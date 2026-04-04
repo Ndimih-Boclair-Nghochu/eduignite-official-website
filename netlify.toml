@@ -1,0 +1,21 @@
+# ─── Netlify Configuration for EduIgnite ─────────────────────────────────────
+# The Next.js app lives in the studio-main/ subdirectory of this repo.
+
+[build]
+  base    = "studio-main"
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+  # Public env vars (safe to commit — no secrets here)
+  NEXT_PUBLIC_APP_NAME      = "EduIgnite"
+  NEXT_PUBLIC_CONTACT_EMAIL = "eduignitecmr@gmail.com"
+
+  # NEXT_PUBLIC_API_URL and NEXT_PUBLIC_APP_URL should be set in the
+  # Netlify dashboard under Site → Environment variables so they can vary
+  # per deploy context (branch / production).
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

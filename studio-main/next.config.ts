@@ -1,8 +1,7 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  // Standalone output for optimized Docker deployments
-  output: 'standalone',
+  // Note: output:'standalone' is only for Docker. Netlify uses the standard build.
   images: {
     remotePatterns: [
       {
