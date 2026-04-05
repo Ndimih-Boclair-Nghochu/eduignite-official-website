@@ -1,4 +1,4 @@
-import apiClient from '../client';
+import { apiClient } from '../client';
 import { API } from '../endpoints';
 import type {
   LiveClass,
