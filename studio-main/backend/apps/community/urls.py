@@ -1,5 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
+app_name = 'community'
 from .views import TestimonyViewSet, CommunityBlogViewSet, BlogCommentViewSet
 
 router = DefaultRouter()

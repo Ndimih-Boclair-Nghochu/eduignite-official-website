@@ -1,5 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
+app_name = 'fees'
 from .views import FeeStructureViewSet, PaymentViewSet, InvoiceViewSet
 
 router = DefaultRouter()

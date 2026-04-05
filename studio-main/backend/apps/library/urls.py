@@ -1,5 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
+app_name = 'library'
 from .views import BookCategoryViewSet, BookViewSet, BookLoanViewSet
 
 router = DefaultRouter()

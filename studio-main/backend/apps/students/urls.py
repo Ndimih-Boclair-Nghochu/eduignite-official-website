@@ -1,5 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
+app_name = 'students'
 from .views import StudentViewSet, ParentStudentLinkViewSet
 
 router = DefaultRouter()

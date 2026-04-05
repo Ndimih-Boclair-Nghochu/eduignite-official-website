@@ -1,5 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
+app_name = 'attendance'
 from .views import AttendanceSessionViewSet, AttendanceRecordViewSet, TeacherAttendanceViewSet
 
 router = DefaultRouter()

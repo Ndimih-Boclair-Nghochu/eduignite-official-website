@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import LiveClass, LiveClassEnrollment
-from apps.users.serializers import UserSerializer
 
 
 class LiveClassSerializer(serializers.ModelSerializer):

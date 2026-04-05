@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Student, ParentStudentLink
-from apps.users.serializers import UserBasicSerializer
+from apps.users.serializers import UserListSerializer as UserBasicSerializer
 
 User = get_user_model()
 

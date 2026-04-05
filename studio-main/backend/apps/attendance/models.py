@@ -53,7 +53,7 @@ class AttendanceRecord(TimeStampedModel):
         ordering = ['-session__date', 'student__user__first_name']
         unique_together = [['session', 'student']]
         indexes = [
-            models.Index(fields=['student', 'session__date']),
+            models.Index(fields=['student', 'session']),
         ]
 
     def __str__(self):
