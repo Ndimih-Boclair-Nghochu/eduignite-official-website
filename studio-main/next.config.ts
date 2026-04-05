@@ -1,7 +1,10 @@
 import type {NextConfig} from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
-  // Note: output:'standalone' is only for Docker. Netlify uses the standard build.
+  // Tell Next.js the real repo root so it doesn't confuse the workspace root
+  // when multiple package-lock.json files exist (silences the workspace warning).
+  outputFileTracingRoot: path.join(__dirname, '../'),
   images: {
     remotePatterns: [
       {
