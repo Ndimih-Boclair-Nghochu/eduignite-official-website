@@ -10,5 +10,4 @@ router.register(r'records', AttendanceRecordViewSet, basename='attendance-record
 router.register(r'teacher-attendance', TeacherAttendanceViewSet, basename='teacher-attendance')
 
 urlpatterns = [
-    path('', include(router.urls)),
-]
+    path('', 

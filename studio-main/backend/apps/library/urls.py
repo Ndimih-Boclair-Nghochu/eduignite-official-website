@@ -10,5 +10,4 @@ router.register(r'books', BookViewSet, basename='book')
 router.register(r'loans', BookLoanViewSet, basename='bookloan')
 
 urlpatterns = [
-    path('', include(router.urls)),
-]
+    path('', inc

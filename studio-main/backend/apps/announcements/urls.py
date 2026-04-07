@@ -8,5 +8,4 @@ router = DefaultRouter()
 router.register(r'announcements', AnnouncementViewSet, basename='announcement')
 
 urlpatterns = [
-    path('', include(router.urls)),
-]
+    path('

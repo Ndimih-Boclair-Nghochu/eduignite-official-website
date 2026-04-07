@@ -10,5 +10,4 @@ router.register(r'blogs', CommunityBlogViewSet, basename='community-blog')
 router.register(r'comments', BlogCommentViewSet, basename='blog-comment')
 
 urlpatterns = [
-    path('', include(router.urls)),
-]
+    path('', i

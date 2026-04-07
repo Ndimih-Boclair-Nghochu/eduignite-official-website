@@ -8,5 +8,4 @@ router = DefaultRouter()
 router.register(r'contributions', SupportContributionViewSet, basename='support-contribution')
 
 urlpatterns = [
-    path('', include(router.urls)),
-]
+    path('', inc

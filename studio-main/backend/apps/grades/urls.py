@@ -15,5 +15,4 @@ router.register(r'term-results', TermResultViewSet, basename='term-result')
 router.register(r'annual-results', AnnualResultViewSet, basename='annual-result')
 
 urlpatterns = [
-    path('', include(router.urls)),
-]
+    path('', incl

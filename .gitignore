@@ -1,0 +1,59 @@
+# ─── Secrets & environment ────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# ─── Next.js ──────────────────────────────────────────────────────────────────
+studio-main/.next/
+studio-main/out/
+studio-main/build/
+# Babel config is only for local dev (sandbox workaround); Netlify uses SWC
+studio-main/.babelrc
+
+# ─── Node ─────────────────────────────────────────────────────────────────────
+node_modules/
+studio-main/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Python / Django ──────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.venv
+venv/
+env/
+.env/
+backend/staticfiles/
+backend/media/
+backend/logs/
+*.log
+
+# ─── Docker ───────────────────────────────────────────────────────────────────
+# Keep docker-compose files but ignore override files
+docker-compose.override.yml
+
+# ─── SSL certificates ─────────────────────────────────────────────────────────
+nginx/ssl/*.pem
+nginx/ssl/*.crt
+nginx/ssl/*.key
+# Keep the .gitkeep placeholder
+!nginx/ssl/.gitkeep
+
+# ─── Editors & OS ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
