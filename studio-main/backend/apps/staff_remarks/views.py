@@ -61,13 +61,16 @@ class StaffRemarkViewSet(viewsets.ModelViewSet):
 
         return Response({'status': 'remark acknowledged'})
 
-    @action(detail=True, methods=['get'])
-    def download_report(self, request, staff_pk=None, pk=None):
+    @action(detail=False, methods=['get'])
+    def download_report(self, request):
         """Download remark history for a staff member (school_admin only)"""
         if request.user.role not in ['school_admin', 'sub_admin', 'executive']:
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
         from apps.users.models import User
+        staff_pk = request.query_params.get('staff')
+        if not staff_pk:
+            return Response({'detail': 'staff query parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             staff = User.objects.get(pk=staff_pk, school=request.user.school)
         except User.DoesNotExist:

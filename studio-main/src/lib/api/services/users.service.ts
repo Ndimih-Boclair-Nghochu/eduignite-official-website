@@ -33,12 +33,14 @@ export const usersService = {
 
   async updateRole(id: string, roleOrPayload: string | { role: string }): Promise<User> {
     const role = typeof roleOrPayload === 'string' ? roleOrPayload : roleOrPayload.role;
-    const { data } = await apiClient.patch(API.USERS.UPDATE_ROLE(id), { role });
+    const { data } = await apiClient.post(API.USERS.UPDATE_ROLE(id), { role });
     return data;
   },
 
-  async toggleLicense(id: string, _payload?: Record<string, unknown>): Promise<User> {
-    const { data } = await apiClient.post(API.USERS.TOGGLE_LICENSE(id), {});
+  async toggleLicense(id: string, payload?: { is_license_paid?: boolean; isLicensePaid?: boolean }): Promise<User> {
+    const { data } = await apiClient.post(API.USERS.TOGGLE_LICENSE(id), {
+      is_license_paid: payload?.is_license_paid ?? payload?.isLicensePaid ?? true,
+    });
     return data;
   },
 

@@ -21,7 +21,7 @@ export const chatService = {
 
   async getOrCreateDirect(userIdOrPayload: string | { userId: string }): Promise<Conversation> {
     const userId = typeof userIdOrPayload === 'string' ? userIdOrPayload : userIdOrPayload.userId;
-    const { data } = await apiClient.get(API.CHAT.DIRECT(userId));
+    const { data } = await apiClient.post(API.CHAT.DIRECT, { user_id: userId });
     return data;
   },
 
@@ -43,7 +43,10 @@ export const chatService = {
         : conversationIdOrPayload.conversation_id ?? conversationIdOrPayload.conversationId ?? '';
     const messageData =
       typeof conversationIdOrPayload === 'string' ? maybeMessageData : conversationIdOrPayload;
-    const { data } = await apiClient.post(API.CHAT.MESSAGES(conversationId), messageData);
+    const { data } = await apiClient.post(API.CHAT.MESSAGES_BASE, {
+      ...messageData,
+      conversation_id: conversationId,
+    });
     return data;
   },
 
@@ -58,8 +61,8 @@ export const chatService = {
     return data;
   },
 
-  async deleteMessage(conversationId: string, messageId?: string): Promise<void> {
+  async deleteMessage(_conversationId: string, messageId?: string): Promise<void> {
     if (!messageId) return;
-    await apiClient.delete(API.CHAT.DELETE_MESSAGE(conversationId, messageId));
+    await apiClient.delete(API.CHAT.DELETE_MESSAGE(messageId));
   },
 };

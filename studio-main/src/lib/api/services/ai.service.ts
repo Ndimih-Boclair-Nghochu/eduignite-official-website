@@ -100,7 +100,7 @@ export const aiService = {
   },
 
   async getPlatformInsights(): Promise<AIRequest> {
-    const { data } = await apiClient.post(API.AI.PLATFORM_INSIGHTS, {});
+    const { data } = await apiClient.get(API.AI.PLATFORM_INSIGHTS);
     return data;
   },
 
