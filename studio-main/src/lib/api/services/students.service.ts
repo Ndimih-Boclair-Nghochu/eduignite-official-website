@@ -45,12 +45,15 @@ export const studentsService = {
 
   async linkParent(
     studentId: string,
-    parentId: string,
-    relationship: string
+    parentIdOrPayload: string | { parentId: string; relationship: string },
+    relationship?: string
   ): Promise<{ detail: string }> {
+    const payload =
+      typeof parentIdOrPayload === 'string'
+        ? { parent_id: parentIdOrPayload, relationship }
+        : { parent_id: parentIdOrPayload.parentId, relationship: parentIdOrPayload.relationship };
     const { data } = await apiClient.post(API.STUDENTS.LINK_PARENT(studentId), {
-      parent_id: parentId,
-      relationship,
+      ...payload,
     });
     return data;
   },

@@ -67,7 +67,7 @@ class StaffRemarkViewSet(viewsets.ModelViewSet):
         if request.user.role not in ['school_admin', 'sub_admin', 'executive']:
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
-        from users.models import User
+        from apps.users.models import User
         try:
             staff = User.objects.get(pk=staff_pk, school=request.user.school)
         except User.DoesNotExist:

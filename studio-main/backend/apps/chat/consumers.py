@@ -3,9 +3,9 @@ import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.utils import timezone
-from rest_framework_simplejwt.tokens import UnicodeToken
+from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import InvalidToken
-from users.models import User
+from apps.users.models import User
 from .models import Conversation, Message, ConversationParticipant
 
 logger = logging.getLogger(__name__)
@@ -237,7 +237,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             raise InvalidToken('No token provided')
 
         try:
-            token = UnicodeToken(token_str)
+            token = AccessToken(token_str)
             user_id = token.get('user_id')
             user = await database_sync_to_async(User.objects.get)(id=user_id)
             return user

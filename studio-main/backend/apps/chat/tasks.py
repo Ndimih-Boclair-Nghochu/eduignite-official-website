@@ -43,7 +43,7 @@ def send_offline_notification(user_id, message_id):
     This is called when a user is not actively connected to WebSocket.
     """
     try:
-        from users.models import User
+        from apps.users.models import User
         from .models import Message
 
         user = User.objects.get(id=user_id)

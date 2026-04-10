@@ -119,6 +119,7 @@ const useToggleSchoolStatus = () => {
 export default function SchoolsManagementPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { data: schools = [] } = useSchools();
   const { data: schoolStats = {} } = useSchoolStats();
   const createSchoolMutation = useCreateSchool();
@@ -129,7 +130,7 @@ export default function SchoolsManagementPage() {
       return data;
     },
     onSuccess: () => {
-      useSchools().refetch?.();
+      queryClient.invalidateQueries({ queryKey: ["schools"] });
     },
   });
   
@@ -150,7 +151,11 @@ export default function SchoolsManagementPage() {
     banner: "https://picsum.photos/seed/school-banner/1200/400"
   });
 
-  const isCEO = user?.role === "CEO" || user?.role === "SUPER_ADMIN";
+  const isFounderOwner = ["SUPER_ADMIN", "CEO", "CTO"].includes(user?.role || "");
+  const platformSettings = {
+    name: "EduIgnite",
+    logo: user?.school?.logo || "https://picsum.photos/seed/eduignite-platform/200/200",
+  };
 
   const filteredSchools = (schools || []).filter((s: any) =>
     s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -199,7 +204,7 @@ export default function SchoolsManagementPage() {
           <p className="text-muted-foreground mt-1">Manage and monitor institutional dashboard instances across the SaaS network.</p>
         </div>
         
-        {isCEO && (
+        {isFounderOwner && (
           <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2 shadow-xl h-14 px-8 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-xs">
@@ -306,7 +311,7 @@ export default function SchoolsManagementPage() {
                      <Settings2 className="w-4 h-4 text-primary/60" /> 
                      <span className="font-bold text-xs">Configuration Suite</span>
                    </DropdownMenuItem>
-                   {isCEO && (
+                  {isFounderOwner && (
                      <>
                        <DropdownMenuItem className="gap-3 rounded-xl cursor-pointer" onClick={() => toggleSchoolStatusMutation.mutateAsync(school.id)}>
                          {school.status === 'Active' ? <Ban className="w-4 h-4 text-red-500" /> : <CheckCircle2 className="w-4 h-4 text-green-500" />}
@@ -403,12 +408,12 @@ export default function SchoolsManagementPage() {
             <div className="bg-primary/5 p-6 rounded-[2rem] border border-primary/10 space-y-6">
                <h3 className="font-black text-primary uppercase text-xs tracking-[0.2em] border-b pb-2 opacity-40">Administrative Interventions</h3>
                <div className="grid grid-cols-1 gap-4">
-                  {isCEO ? (
+                 {isFounderOwner ? (
                     <>
-                      <Button variant="outline" className="w-full justify-between h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-white border-primary/10 hover:bg-primary/5 transition-all" onClick={() => { toggleSchoolStatus(managedSchool.id); setManagedSchool(null); }}>
+                      <Button variant="outline" className="w-full justify-between h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-white border-primary/10 hover:bg-primary/5 transition-all" onClick={() => { toggleSchoolStatusMutation.mutate(managedSchool.id); setManagedSchool(null); }}>
                         License Authorization {managedSchool?.status === 'Active' ? <Ban className="w-5 h-5 text-red-500" /> : <CheckCircle2 className="w-5 h-5 text-green-500" />}
                       </Button>
-                      <Button variant="destructive" className="w-full justify-between h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg opacity-80 hover:opacity-100 transition-all" onClick={() => { deleteSchool(managedSchool.id); setManagedSchool(null); }}>
+                      <Button variant="destructive" className="w-full justify-between h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg opacity-80 hover:opacity-100 transition-all" onClick={() => { deleteSchoolMutation.mutate(managedSchool.id); setManagedSchool(null); }}>
                         Permanently Decommission <Trash2 className="w-5 h-5" />
                       </Button>
                     </>

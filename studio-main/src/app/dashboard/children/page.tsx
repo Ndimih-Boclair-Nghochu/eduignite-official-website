@@ -10,26 +10,7 @@ import { useI18n } from "@/lib/i18n-context";
 import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
 
-const CHILDREN = [
-  {
-    id: "GBHS26S001",
-    name: "Alice Thompson",
-    grade: "2nde / Form 5",
-    gpa: "16.45",
-    attendance: "98%",
-    nextClass: "Physics 101 - 09:00 AM",
-    avatar: "https://picsum.photos/seed/alice/200/200"
-  },
-  {
-    id: "GBHS26S004",
-    name: "Diana Thompson",
-    grade: "4ème / Form 3",
-    gpa: "14.20",
-    attendance: "95%",
-    nextClass: "Biology Lab - 10:30 AM",
-    avatar: "https://picsum.photos/seed/diana/200/200"
-  }
-];
+const CHILDREN: any[] = [];
 
 export default function ChildrenPage() {
   const { t, language } = useI18n();

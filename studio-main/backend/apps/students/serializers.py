@@ -130,4 +130,4 @@ class HonourRollSerializer(serializers.ModelSerializer):
             class_level=obj.class_level,
             annual_average__gt=obj.annual_average
         ).count()
-   
+        return count + 1

@@ -102,6 +102,7 @@ export default function AiAssistantPage() {
 
   // Child selector for parent report
   const [selectedChildId, setSelectedChildId] = useState<string>("");
+  const currentStudentId = user?.id ?? "";
 
   // Get requests list
   const requests = requestsResponse?.results ?? [];
@@ -140,6 +141,7 @@ export default function AiAssistantPage() {
     setIsSubmitting(true);
     try {
       await studyPlanMutation.mutateAsync({
+        studentId: currentStudentId,
         subjects: selectedSubjects,
         weeks: selectedWeeks,
       });
@@ -166,7 +168,10 @@ export default function AiAssistantPage() {
   const handleAnalyzeGrades = async () => {
     setIsSubmitting(true);
     try {
-      await analyzeGradesMutation.mutateAsync({});
+      await analyzeGradesMutation.mutateAsync({
+        studentId: currentStudentId,
+        sequenceId: "current",
+      });
       toast({
         title: "Grade analysis requested",
         description: "Your grades are being analyzed...",
@@ -197,6 +202,7 @@ export default function AiAssistantPage() {
     setIsSubmitting(true);
     try {
       await examPrepMutation.mutateAsync({
+        studentId: currentStudentId,
         subject_id: selectedSubjectExam,
       });
       toast({
@@ -231,6 +237,7 @@ export default function AiAssistantPage() {
     setIsSubmitting(true);
     try {
       await parentReportMutation.mutateAsync({
+        studentId: selectedChildId,
         student_id: selectedChildId,
       });
       toast({

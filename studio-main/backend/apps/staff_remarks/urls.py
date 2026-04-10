@@ -8,4 +8,5 @@ router = DefaultRouter()
 router.register(r'remarks', StaffRemarkViewSet, basename='staff-remark')
 
 urlpatterns = [
-    path('
+    path('', include(router.urls)),
+]

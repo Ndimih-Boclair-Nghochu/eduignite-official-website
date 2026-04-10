@@ -141,7 +141,7 @@ export function useToggleSchoolStatus() {
     }: {
       id: string;
       data: ToggleSchoolStatusRequest;
-    }) => schoolsService.toggleSchoolStatus(id, data),
+    }) => schoolsService.toggleSchoolStatus(id, data as Record<string, unknown>),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: schoolsKeys.detail(variables.id),

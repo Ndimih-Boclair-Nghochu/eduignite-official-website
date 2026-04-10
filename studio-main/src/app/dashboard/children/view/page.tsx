@@ -69,45 +69,13 @@ import Link from "next/link";
 
 const CLASSES = ["6ème / Form 1", "5ème / Form 2", "4ème / Form 3", "3ème / Form 4", "2nde / Form 5", "1ère / Lower Sixth", "Terminale / Upper Sixth"];
 
-const MOCK_CHILDREN = [
-  {
-    id: "GBHS26S001",
-    uid: "S1",
-    name: "Alice Thompson",
-    class: "2nde / Form 5",
-    section: "Anglophone Section",
-    email: "alice@gbhsdeido.cm",
-    status: "active",
-    isLicensePaid: true,
-    avatar: "https://picsum.photos/seed/alice/200/200",
-    dob: "15/05/2008",
-    gender: "Female",
-    guardian: "Mr. Robert Thompson",
-    guardianPhone: "+237 677 00 11 22",
-    address: "Bonapriso, Douala",
-    annualAvg: 16.45
-  }
-];
+const MOCK_CHILDREN: any[] = [];
 
-const MOCK_GRADES = [
-  { subject: "Advanced Physics", teacher: "Dr. Aris Tesla", coef: 4, seq1: 14.5, seq2: 16.0, average: 15.25, total: 61.0, rank: "2nd", initials: "AT" },
-  { subject: "Mathematics", teacher: "Prof. Sarah Smith", coef: 5, seq1: 18.0, seq2: 17.5, average: 17.75, total: 88.75, rank: "1st", initials: "SM" },
-  { subject: "English Literature", teacher: "Ms. Bennet", coef: 3, seq1: 12.0, seq2: 14.0, average: 13.0, total: 39.0, rank: "5th", initials: "MB" },
-  { subject: "Chemistry", teacher: "Dr. White", coef: 4, seq1: 13.5, seq2: 12.5, average: 13.0, total: 52.0, rank: "8th", initials: "DW" },
-];
+const MOCK_GRADES: any[] = [];
 
-const MOCK_TRANSCRIPT_DATA = {
-  "Advanced Physics": { f1: ["12.5", "13.0", "14.2"], f2: ["11.0", "12.5", "13.5"], f3: ["14.0", "15.5", "16.0"] },
-  "Mathematics": { f1: ["15.0", "16.5", "17.0"], f2: ["14.5", "15.0", "16.0"], f3: ["17.5", "18.0", "17.5"] },
-  "English Literature": { f1: ["10.0", "11.5", "12.0"], f2: ["09.5", "10.0", "11.0"], f3: ["12.5", "13.0", "13.5"] },
-  "General Chemistry": { f1: ["13.5", "14.0", "14.5"], f2: ["12.0", "13.5", "14.0"], f3: ["15.0", "16.0", "16.5"] },
-};
+const MOCK_TRANSCRIPT_DATA: Record<string, any> = {};
 
-const MOCK_TODAY_ATTENDANCE = [
-  { subject: "Advanced Physics", status: "present", time: "08:00 AM", teacher: "Dr. Aris Tesla" },
-  { subject: "Mathematics", status: "present", time: "10:30 AM", teacher: "Prof. Sarah Smith" },
-  { subject: "English Literature", status: "absent", time: "01:30 PM", teacher: "Ms. Bennet" },
-];
+const MOCK_TODAY_ATTENDANCE: any[] = [];
 
 export default function StudentDetailsPage() {
   const searchParams = useSearchParams();

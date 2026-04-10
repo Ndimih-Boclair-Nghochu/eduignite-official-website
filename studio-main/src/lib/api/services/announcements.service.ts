@@ -46,6 +46,10 @@ export const announcementsService = {
     return data;
   },
 
+  async markAnnouncementRead(id: string): Promise<Announcement> {
+    return this.markRead(id);
+  },
+
   async deleteAnnouncement(id: string): Promise<void> {
     await apiClient.delete(API.ANNOUNCEMENTS.DETAIL(id));
   },
@@ -55,5 +59,11 @@ export const announcementsService = {
   ): Promise<PaginatedResponse<Announcement>> {
     const { data } = await apiClient.get(API.ANNOUNCEMENTS.PLATFORM_WIDE, { params });
     return data;
+  },
+
+  async getPlatformAnnouncements(
+    params?: ListParams
+  ): Promise<PaginatedResponse<Announcement>> {
+    return this.getPlatformWideAnnouncements(params);
   },
 };

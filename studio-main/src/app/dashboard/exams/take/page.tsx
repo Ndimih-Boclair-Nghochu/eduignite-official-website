@@ -17,34 +17,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 // Mock Exam Questions with support for images and text combinations
-const MOCK_QUESTIONS = [
-  {
-    id: 1,
-    text: "Identify the electronic component shown in the diagram below:",
-    imageUrl: "https://picsum.photos/seed/physics-comp/800/400",
-    options: ["Resistor", "Capacitor", "Transistor", "Diode"],
-    correct: 1
-  },
-  {
-    id: 2,
-    text: "Which law of thermodynamics states that entropy of an isolated system never decreases?",
-    options: ["Zeroth Law", "First Law", "Second Law", "Third Law"],
-    correct: 2
-  },
-  {
-    id: 3,
-    text: "", // Image-only question
-    imageUrl: "https://picsum.photos/seed/physics-graph/800/400",
-    options: ["Constant Velocity", "Uniform Acceleration", "Stationary Object", "Deceleration"],
-    correct: 1
-  },
-  {
-    id: 4,
-    text: "The rate of change of displacement is known as:",
-    options: ["Speed", "Acceleration", "Velocity", "Momentum"],
-    correct: 2
-  }
-];
+const MOCK_QUESTIONS: any[] = [];
 
 export default function TakeExamPage() {
   const { user } = useAuth();

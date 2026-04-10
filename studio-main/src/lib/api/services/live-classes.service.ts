@@ -69,7 +69,3 @@ export const liveClassesService = {
   cancelClass: (id: string) =>
     apiClient.post(API.LIVE_CLASSES.CANCEL(id)).then(r => r.data),
 };
-
-/** Platform admin: clear all demo data */
-export const clearDemoData = () =>
-  apiClient.post(API.PLATFORM.CLEAR_DEMO_DATA).then(r => r.data);

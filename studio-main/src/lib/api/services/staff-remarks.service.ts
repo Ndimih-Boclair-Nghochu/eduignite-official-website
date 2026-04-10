@@ -12,6 +12,10 @@ export const staffRemarksService = {
     return data;
   },
 
+  async getStaffRemarks(params?: ListParams): Promise<PaginatedResponse<StaffRemark>> {
+    return this.getRemarks(params);
+  },
+
   async getRemark(id: string): Promise<StaffRemark> {
     const { data } = await apiClient.get(API.STAFF_REMARKS.DETAIL(id));
     return data;
@@ -32,7 +36,8 @@ export const staffRemarksService = {
     return data;
   },
 
-  async acknowledgeRemark(id: string): Promise<StaffRemark> {
+  async acknowledgeRemark(idOrPayload: string | { id: string }): Promise<StaffRemark> {
+    const id = typeof idOrPayload === 'string' ? idOrPayload : idOrPayload.id;
     const { data } = await apiClient.post(API.STAFF_REMARKS.ACKNOWLEDGE(id), {});
     return data;
   },

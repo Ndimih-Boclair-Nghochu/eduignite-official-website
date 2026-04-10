@@ -56,7 +56,8 @@ export function useMessages(
 ) {
   return useInfiniteQuery({
     queryKey: chatKeys.messages(convId),
-    queryFn: ({ pageParam = undefined }) =>
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
       chatService.getMessages(convId, {
         ...params,
         cursor: pageParam,
@@ -92,9 +93,10 @@ export function useSendMessage() {
     mutationFn: (data: SendMessageRequest) =>
       chatService.sendMessage(data),
     onSuccess: (response, variables) => {
+      const conversationId = variables.conversation_id ?? variables.conversationId ?? "";
       // Optimistically update cache
       queryClient.setQueryData(
-        chatKeys.messages(variables.conversation_id),
+        chatKeys.messages(conversationId),
         (oldData: any) => {
           if (!oldData) return undefined;
           return {

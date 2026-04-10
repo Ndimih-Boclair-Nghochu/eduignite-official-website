@@ -7,11 +7,8 @@ import { I18nProvider } from "@/lib/i18n-context";
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { TopProgressBar } from "@/components/layout/progress-bar";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "@/lib/api/query-client";
+import { AppProviders } from "@/app/providers";
 import { Suspense } from "react";
-
-const isDev = process.env.NODE_ENV === "development";
 
 export const metadata: Metadata = {
   title: "EduIgnite | School Management System",
@@ -44,7 +41,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased selection:bg-secondary selection:text-secondary-foreground">
-        <QueryClientProvider client={queryClient}>
+        <AppProviders>
           <I18nProvider>
             <FirebaseClientProvider>
               <AuthProvider>
@@ -60,15 +57,7 @@ export default function RootLayout({
               </AuthProvider>
             </FirebaseClientProvider>
           </I18nProvider>
-          {isDev && (
-            <Suspense fallback={null}>
-              {(() => {
-                const ReactQueryDevtools = require("@tanstack/react-query-devtools").ReactQueryDevtools;
-                return <ReactQueryDevtools initialIsOpen={false} />;
-              })()}
-            </Suspense>
-          )}
-        </QueryClientProvider>
+        </AppProviders>
       </body>
     </html>
   );

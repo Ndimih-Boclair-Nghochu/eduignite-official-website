@@ -341,7 +341,7 @@ export default function CommunityPage() {
                           <div className="text-xs">
                             <p className="font-bold text-primary">{blog.author?.name}</p>
                             <p className="text-muted-foreground flex items-center gap-1">
-                              <Clock className="w-3 h-3" /> {new Date(blog.created_at).toLocaleDateString()}
+                               <Clock className="w-3 h-3" /> {new Date(blog.created_at ?? Date.now()).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
@@ -383,7 +383,7 @@ export default function CommunityPage() {
                             </Avatar>
                             <div className="text-xs">
                               <p className="font-bold text-primary">{selectedBlog?.author?.name}</p>
-                              <p className="text-muted-foreground">{new Date(selectedBlog?.created_at).toLocaleDateString()}</p>
+                              <p className="text-muted-foreground">{new Date(selectedBlog?.created_at ?? Date.now()).toLocaleDateString()}</p>
                             </div>
                           </div>
                           {selectedBlog?.paragraphs.map((para, idx) => (

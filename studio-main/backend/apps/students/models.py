@@ -53,7 +53,7 @@ class Student(TimeStampedModel):
     qr_code = models.ImageField(upload_to='student_qr_codes/', null=True, blank=True)
 
     class Meta:
-        ordering = ['student_class', 'user__first_name', 'user__last_name']
+        ordering = ['student_class', 'user__name']
         indexes = [
             models.Index(fields=['school', 'class_level']),
             models.Index(fields=['admission_number']),

@@ -139,7 +139,7 @@ export function useToggleLicense() {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: ToggleLicenseRequest }) =>
-      usersService.toggleLicense(id, data),
+      usersService.toggleLicense(id, data as Record<string, unknown>),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: usersKeys.detail(variables.id),

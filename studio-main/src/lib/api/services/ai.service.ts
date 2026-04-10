@@ -19,22 +19,34 @@ export const aiService = {
   },
 
   async generateStudyPlan(
-    studentId: string,
-    subjects: string[],
-    weeks: number
+    studentIdOrPayload: string | { studentId?: string; subjects: string[]; duration?: number; weeks?: number },
+    subjects?: string[],
+    weeks?: number
   ): Promise<AIRequest> {
+    const payload =
+      typeof studentIdOrPayload === 'string'
+        ? { student: studentIdOrPayload, subjects, weeks }
+        : {
+            student: studentIdOrPayload.studentId,
+            subjects: studentIdOrPayload.subjects,
+            weeks: studentIdOrPayload.weeks ?? studentIdOrPayload.duration,
+          };
     const { data } = await apiClient.post(API.AI.STUDY_PLAN, {
-      student: studentId,
-      subjects,
-      weeks,
+      ...payload,
     });
     return data;
   },
 
-  async analyzeGrades(studentId: string, sequenceId: string): Promise<AIRequest> {
+  async analyzeGrades(
+    studentIdOrPayload: string | { studentId?: string; sequenceId?: string },
+    sequenceId?: string
+  ): Promise<AIRequest> {
+    const payload =
+      typeof studentIdOrPayload === 'string'
+        ? { student: studentIdOrPayload, sequence: sequenceId }
+        : { student: studentIdOrPayload.studentId, sequence: studentIdOrPayload.sequenceId };
     const { data } = await apiClient.post(API.AI.ANALYZE_GRADES, {
-      student: studentId,
-      sequence: sequenceId,
+      ...payload,
     });
     return data;
   },
@@ -54,6 +66,32 @@ export const aiService = {
     return data;
   },
 
+  async generateAttendanceInsight(payload: {
+    studentId: string;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<AIRequest> {
+    return this.getAttendanceInsight(payload.studentId);
+  },
+
+  async generateExamPrepPlan(payload: {
+    studentId?: string;
+    subjectId?: string;
+    subject_id?: string;
+    examType?: string;
+    daysLeft?: number;
+  }): Promise<AIRequest> {
+    return this.getExamPrep(payload.studentId, payload.subjectId ?? payload.subject_id ?? payload.examType ?? '');
+  },
+
+  async generateParentReport(payload: {
+    studentId?: string;
+    student_id?: string;
+    period?: string;
+  }): Promise<AIRequest> {
+    return this.getParentReport(payload.studentId ?? payload.student_id ?? '');
+  },
+
   async getParentReport(studentId: string): Promise<AIRequest> {
     const { data } = await apiClient.post(API.AI.PARENT_REPORT, {
       student: studentId,
@@ -71,12 +109,16 @@ export const aiService = {
     return data;
   },
 
+  async getAIInsights(params?: ListParams): Promise<PaginatedResponse<AIInsight>> {
+    return this.getInsights(params);
+  },
+
   async getInsight(id: string): Promise<AIInsight> {
     const { data } = await apiClient.get(API.AI.INSIGHT_DETAIL(id));
     return data;
   },
 
-  async generateInsights(): Promise<AIInsight> {
+  async generateInsights(_payload?: any): Promise<AIInsight> {
     const { data } = await apiClient.post(API.AI.GENERATE_INSIGHTS, {});
     return data;
   },

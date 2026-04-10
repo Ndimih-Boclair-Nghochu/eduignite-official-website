@@ -36,6 +36,10 @@ export const gradesService = {
     return data;
   },
 
+  async getActiveSequences(): Promise<PaginatedResponse<Sequence>> {
+    return this.getSequences({ is_active: true });
+  },
+
   async createSequence(sequenceData: Partial<Sequence>): Promise<Sequence> {
     const { data } = await apiClient.post(API.GRADES.SEQUENCES, sequenceData);
     return data;

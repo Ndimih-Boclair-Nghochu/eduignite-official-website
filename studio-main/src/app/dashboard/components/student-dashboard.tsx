@@ -77,9 +77,9 @@ export function StudentDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Term Average", value: `${annualAvgDisplay} / 20`, icon: Award, color: "text-amber-600", bg: "bg-amber-50" },
-          { label: "Attendance Integrity", value: "98.2%", icon: ClipboardCheck, color: "text-purple-600", bg: "bg-purple-50" },
-          { label: "Pending Tasks", value: "4 Assignments", icon: ListChecks, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Library Loans", value: "2 Volumes", icon: BookMarked, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Attendance Integrity", value: "0%", icon: ClipboardCheck, color: "text-purple-600", bg: "bg-purple-50" },
+          { label: "Pending Tasks", value: "0 Assignments", icon: ListChecks, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Library Loans", value: "0 Volumes", icon: BookMarked, color: "text-emerald-600", bg: "bg-emerald-50" },
         ].map((stat, i) => (
           <Card key={i} className="border-none shadow-sm group hover:shadow-md transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">

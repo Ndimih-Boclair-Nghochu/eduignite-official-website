@@ -39,8 +39,16 @@ export const platformService = {
     return data;
   },
 
+  async createPublicEvent(eventData: Partial<PublicEvent>): Promise<PublicEvent> {
+    return this.createEvent(eventData);
+  },
+
   async deleteEvent(id: string): Promise<void> {
     await apiClient.delete(API.PLATFORM.EVENT_DETAIL(id));
+  },
+
+  async deletePublicEvent(id: string): Promise<void> {
+    return this.deleteEvent(id);
   },
 
   async getPlatformStats(): Promise<PlatformStats> {

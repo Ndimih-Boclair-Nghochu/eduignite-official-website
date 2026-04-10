@@ -10,7 +10,7 @@ class UserAdmin(BaseUserAdmin):
     """Custom User admin."""
 
     list_display = ('matricule', 'name', 'email', 'role', 'school', 'is_active', 'is_license_paid')
-    list_filter = ('role', 'is_active', 'is_license_paid', 'is_platform_executive', 'date_joined')
+    list_filter = ('role', 'is_active', 'is_license_paid', 'date_joined')
     search_fields = ('matricule', 'name', 'email', 'phone')
     ordering = ('-date_joined',)
 

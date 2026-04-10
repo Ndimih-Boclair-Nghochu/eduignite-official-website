@@ -1,193 +1,116 @@
-# EduIgnite — School Management System
+# EduIgnite
 
-A full-stack school management platform for Cameroonian schools. Built with **Next.js 15** (frontend) and **Django 4.2** (backend).
+EduIgnite is a full-stack school management platform built with **Next.js 15** for the frontend and **Django 4.2** for the backend.
 
----
+## Deployment Model
 
-## Quick Start
+- Frontend: deploy `studio-main/` to **Vercel**
+- Backend: deploy `studio-main/backend/` to a Python host
+- Database: use **PostgreSQL**
 
-### 1. Backend (Django)
+The frontend is Vercel-ready. The backend should be hosted separately because the Django stack includes API, Channels, and Celery concerns that are better suited to a full Python runtime than an all-in-one Vercel deployment.
 
-**Prerequisites:** Python 3.11+, PostgreSQL 15, Redis 7
+## Local Development
+
+### Backend
+
+Prerequisites:
+
+- Python 3.11+
+- PostgreSQL 15+
+- Redis 7+ for Channels/Celery features
 
 ```bash
 cd backend
-
-# Create a virtual environment
 python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements/development.txt
-
-# Configure environment variables
 cp .env.example .env
-# Edit .env with your database credentials and Firebase config
-
-# Apply database migrations
 python manage.py migrate
-
-# Seed demo data (15 accounts + school + subjects + grades)
-python manage.py seed_demo
-
-# Start the development server
 python manage.py runserver
 ```
 
-The API will be available at `http://localhost:8000/api/v1/`
-API docs: `http://localhost:8000/api/docs/`
+API: `http://localhost:8000/api/v1/`
 
-**Demo Login Credentials:**
+### Frontend
 
-| Role         | Matricule        | Password        |
-|--------------|------------------|-----------------|
-| CEO          | EDUI26CEO001     | EduIgnite@2026  |
-| CTO          | EDUI26CTO001     | EduIgnite@2026  |
-| School Admin | GBHS26ADM001     | Admin@2026      |
-| Sub Admin    | GBHS26SUB001     | Admin@2026      |
-| Teacher      | GBHS26T001       | Teacher@2026    |
-| Student      | GBHS26S001       | Student@2026    |
-| Parent       | GBHS26P001       | Parent@2026     |
-| Bursar       | GBHS26BRS001     | Bursar@2026     |
-| Librarian    | GBHS26LIB001     | Library@2026    |
+Prerequisites:
 
----
-
-### 2. Frontend (Next.js)
-
-**Prerequisites:** Node.js 20+
+- Node.js 20+
 
 ```bash
-# From the project root
+cd ..
 npm install
-
-# Configure environment variables
-cp .env.local.example .env.local
-# Edit .env.local — set NEXT_PUBLIC_API_URL and Firebase credentials
-
-# Start the development server
+cp .env.example .env.local
 npm run dev
 ```
 
-The app will be available at `http://localhost:3000`
+App: `http://localhost:3000`
 
----
+## Vercel Frontend Setup
 
-### 3. Backend Environment Variables (`.env`)
+1. Import the repository into Vercel.
+2. Set the project root directory to `studio-main`.
+3. Install command: `npm install`
+4. Build command: `npm run build`
+5. Add the required environment variables.
 
-```ini
-SECRET_KEY=your-django-secret-key
-DEBUG=True
-DATABASE_URL=postgres://user:password@localhost:5432/eduignite
-REDIS_URL=redis://localhost:6379/0
-
-# Firebase Admin SDK
-FIREBASE_PROJECT_ID=your-firebase-project-id
-FIREBASE_PRIVATE_KEY_ID=...
-FIREBASE_PRIVATE_KEY=...
-FIREBASE_CLIENT_EMAIL=...
-FIREBASE_CLIENT_ID=...
-
-# Optional: Gemini AI
-GEMINI_API_KEY=...
-```
-
-### 4. Frontend Environment Variables (`.env.local`)
+Frontend environment variables:
 
 ```ini
-NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
-NEXT_PUBLIC_WS_URL=ws://localhost:8001
-
-# Firebase
-NEXT_PUBLIC_FIREBASE_API_KEY=...
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
-NEXT_PUBLIC_FIREBASE_APP_ID=...
+NEXT_PUBLIC_API_URL=https://your-backend-domain/api/v1
+NEXT_PUBLIC_APP_URL=https://your-vercel-domain.vercel.app
+NEXT_PUBLIC_APP_NAME=EduIgnite
+NEXT_PUBLIC_CONTACT_EMAIL=eduignitecmr@gmail.com
 ```
 
----
+## Backend Hosting Setup
 
-## Architecture
+Deploy `backend/` to Railway, Render, Fly.io, a VPS, or another Python host.
 
-```
-eduignite/
-├── backend/                    # Django REST API
-│   ├── apps/
-│   │   ├── authentication/     # JWT + Firebase login
-│   │   ├── users/              # User model, roles, seed command
-│   │   ├── schools/            # School management
-│   │   ├── students/           # Student profiles
-│   │   ├── grades/             # Subjects, sequences, grades
-│   │   ├── attendance/         # Sessions and records
-│   │   ├── fees/               # Fee structures and payments
-│   │   ├── library/            # Books and loans
-│   │   ├── announcements/      # School announcements
-│   │   ├── community/          # Blogs and testimonies
-│   │   ├── chat/               # WebSocket messaging
-│   │   ├── ai_features/        # Gemini AI integration
-│   │   ├── platform/           # Platform-wide settings
-│   │   ├── feedback/           # User feedback
-│   │   ├── support/            # Support contributions
-│   │   ├── orders/             # Subscription orders
-│   │   └── staff_remarks/      # Staff performance notes
-│   └── config/                 # Django settings, URLs, ASGI
-│
-└── src/                        # Next.js frontend
-    ├── app/
-    │   ├── dashboard/          # Protected dashboard pages
-    │   │   ├── components/     # Role-specific dashboards
-    │   │   ├── ai-assistant/   # AI chat interface
-    │   │   ├── grades/         # Grade management
-    │   │   ├── attendance/     # Attendance tracking
-    │   │   ├── fees/           # Payment management
-    │   │   └── ...             # Other feature pages
-    │   ├── login/              # Authentication page
-    │   └── layout.tsx          # Root layout with providers
-    └── lib/
-        ├── api/
-        │   ├── client.ts       # Axios + JWT interceptor
-        │   ├── endpoints.ts    # All API endpoint constants
-        │   ├── services/       # 17 service modules
-        │   └── types.ts        # TypeScript interfaces
-        └── hooks/              # TanStack Query hooks
+Required backend environment variables:
+
+```ini
+DJANGO_SECRET_KEY=replace-me
+DEBUG=False
+ENVIRONMENT=production
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DBNAME
+ALLOWED_HOSTS=your-backend-domain
+CORS_ALLOWED_ORIGINS=https://your-vercel-domain.vercel.app
+CSRF_TRUSTED_ORIGINS=https://your-vercel-domain.vercel.app
 ```
 
----
+Useful optional variables:
 
-## User Roles
+```ini
+REDIS_URL=redis://HOST:6379/1
+CELERY_BROKER_URL=redis://HOST:6379/0
+CELERY_RESULT_BACKEND=redis://HOST:6379/0
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_STORAGE_BUCKET_NAME=
+SENTRY_DSN=
+```
 
-| Role         | Access Level      | Notes                              |
-|--------------|-------------------|------------------------------------|
-| SUPER_ADMIN  | Platform-wide     | Full system access                 |
-| CEO / CTO / COO / INV / DESIGNER | Platform-wide | Executive dashboards |
-| SCHOOL_ADMIN | School-wide       | Manages all school operations      |
-| SUB_ADMIN    | School-wide       | Limited admin access               |
-| TEACHER      | Class-specific    | Grades, attendance, assignments    |
-| STUDENT      | Personal          | Grades, schedule, AI assistant     |
-| PARENT       | Child-specific    | View child's academic record       |
-| BURSAR       | Financial         | Payments and fee management        |
-| LIBRARIAN    | Library           | Books and loan management          |
-
----
-
-## Running with Docker
+After deploy:
 
 ```bash
-cd backend
-docker-compose up --build
-
-# In a separate terminal, seed the database
-docker-compose exec web python manage.py migrate
-docker-compose exec web python manage.py seed_demo
+python manage.py migrate
+python manage.py collectstatic --noinput
 ```
 
-Services:
-- **web** (Django) → port 8000
-- **channels** (Daphne WebSocket) → port 8001
-- **db** (PostgreSQL) → port 5432
-- **redis** → port 6379
-- **celery** (background tasks)
-- **celery-beat** (scheduled tasks)
-- **nginx** → port 80 (proxies to web and channels)
+## Environment Notes
+
+- PostgreSQL is the intended production database.
+- If `REDIS_URL` is not set, the backend now falls back to local in-memory cache/channel settings for simpler non-realtime environments.
+- No demo seed step is required or documented in this repository.
+
+## Repo Structure
+
+```text
+studio-main/
+├── backend/      Django API
+├── src/          Next.js app source
+├── package.json
+└── next.config.ts
+```

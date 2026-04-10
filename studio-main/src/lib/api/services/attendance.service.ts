@@ -43,16 +43,28 @@ export const attendanceService = {
   },
 
   async bulkRecordAttendance(
-    sessionId: string,
-    records: Array<{
+    sessionIdOrPayload:
+      | string
+      | {
+          sessionId: string;
+          records: Array<{
+            student: string;
+            status: 'Present' | 'Absent' | 'Late' | 'Excused';
+            excuse_note?: string;
+          }>;
+        },
+    records?: Array<{
       student: string;
       status: 'Present' | 'Absent' | 'Late' | 'Excused';
       excuse_note?: string;
     }>
   ): Promise<AttendanceRecord[]> {
+    const payload =
+      typeof sessionIdOrPayload === 'string'
+        ? { session: sessionIdOrPayload, records }
+        : { session: sessionIdOrPayload.sessionId, records: sessionIdOrPayload.records };
     const { data } = await apiClient.post(API.ATTENDANCE.BULK_RECORD, {
-      session: sessionId,
-      records,
+      ...payload,
     });
     return data;
   },
@@ -67,6 +79,10 @@ export const attendanceService = {
     return data;
   },
 
+  async getStudentAttendanceSummary(studentId: string): Promise<AttendanceSummary> {
+    return this.getStudentSummary(studentId);
+  },
+
   async getClassReport(
     className: string,
     startDate?: string,
@@ -76,6 +92,14 @@ export const attendanceService = {
       params: { start_date: startDate, end_date: endDate },
     });
     return data;
+  },
+
+  async getClassAttendanceReport(
+    className: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<any> {
+    return this.getClassReport(className, startDate, endDate);
   },
 
   async getAbsentToday(): Promise<any[]> {
@@ -95,5 +119,9 @@ export const attendanceService = {
   }): Promise<any> {
     const { data } = await apiClient.post(API.ATTENDANCE.TEACHER_ATTENDANCE, recordData);
     return data;
+  },
+
+  async createAttendanceSession(sessionData: Partial<AttendanceSession>): Promise<AttendanceSession> {
+    return this.createSession(sessionData);
   },
 };

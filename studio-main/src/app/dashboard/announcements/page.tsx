@@ -48,11 +48,11 @@ export default function AnnouncementsPage() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const isPlatformExecutive = ["CEO", "CTO", "COO", "INV", "DESIGNER", "SUPER_ADMIN"].includes(user?.role || "");
-  const isCEO = user?.role === "CEO" || user?.role === "SUPER_ADMIN";
+  const isFounderOwner = ["SUPER_ADMIN", "CEO", "CTO"].includes(user?.role || "");
   const isSchoolAdmin = user?.role === "SCHOOL_ADMIN";
   const isTeacher = user?.role === "TEACHER";
 
-  const initialTarget = isCEO ? "all_schools" : isPlatformExecutive ? "saas_admins" : "everyone";
+  const initialTarget = isFounderOwner ? "all_schools" : isPlatformExecutive ? "saas_admins" : "everyone";
   const [formData, setFormData] = useState({ title: "", content: "", target: initialTarget });
 
   const canPost = isPlatformExecutive || isSchoolAdmin || isTeacher;
@@ -244,7 +244,7 @@ export default function AnnouncementsPage() {
           </div>
         </CardFooter>
       )}
-      {(isCEO || user?.uid === ann.senderUid) && (
+      {(isFounderOwner || user?.uid === ann.senderUid) && (
         <CardFooter className="pt-0 justify-end">
           <Button
             variant="ghost"
@@ -308,7 +308,7 @@ export default function AnnouncementsPage() {
                     {isPlatformExecutive ? (
                       <SelectGroup>
                         <SelectLabel className="text-[10px] font-black uppercase opacity-40 px-3 py-2">Board Channels</SelectLabel>
-                        {isCEO && <SelectItem value="all_schools" className="font-bold">All Registered Schools (CEO)</SelectItem>}
+                        {isFounderOwner && <SelectItem value="all_schools" className="font-bold">All Registered Schools (Founders)</SelectItem>}
                         <SelectItem value="saas_admins">Full Board of Directors</SelectItem>
                         <SelectItem value="board_directors">Strategic Operations (Directors)</SelectItem>
                         <SelectItem value="investors">Investor Relations</SelectItem>

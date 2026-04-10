@@ -147,7 +147,7 @@ export default function SchoolSettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2 space-y-2">
                   <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Official School Name</Label>
-                  <Input value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="bg-accent/30 border-none h-12 rounded-xl font-bold text-lg" placeholder="e.g. GBHS Deido" />
+                  <Input value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="bg-accent/30 border-none h-12 rounded-xl font-bold text-lg" placeholder="e.g. Example Secondary School" />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Short Name / Code</Label>

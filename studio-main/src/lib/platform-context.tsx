@@ -50,36 +50,18 @@ const DEFAULT_TUTORIALS: TutorialLinks = {
 
 const PLATFORM_DEFAULTS: PlatformSettings = {
   name: "EduIgnite",
-  logo: "https://picsum.photos/seed/eduignite-platform/200/200",
-  paymentDeadline: "2024-10-31",
+  logo: "",
+  paymentDeadline: "",
   fees: DEFAULT_FEES,
   tutorialLinks: DEFAULT_TUTORIALS,
   honourRollThreshold: 15.0
 };
 
-const INITIAL_SCHOOLS: SchoolInfo[] = [{
-  id: "GBHS-D", name: "GBHS Deido", shortName: "GBHSD", principal: "Dr. Jean-Pierre Fonka",
-  motto: "Discipline - Work - Success", logo: "https://picsum.photos/seed/school-logo-1/200/200",
-  banner: "https://picsum.photos/seed/school-banner/1200/400",
-  description: "One of the premier government institutions in Douala.",
-  location: "Douala, Littoral", region: "Littoral", division: "Wouri",
-  subDivision: "Douala 1er", cityVillage: "Douala", address: "Rue de Deido, BP 123",
-  phone: "+237 670 00 00 00", email: "contact@gbhsdeido.cm", status: "Active"
-}];
+const INITIAL_SCHOOLS: SchoolInfo[] = [];
 
-const INITIAL_EVENTS: PublicEvent[] = [
-  { id: "e1", type: "video", title: "Annual Pedagogical Conference 2024", description: "Witness the digital transformation journey of 120+ schools.", url: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
-  { id: "e2", type: "image", title: "New STEM Laboratory Launch", description: "Inaugurating state-of-the-art facilities.", url: "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986&auto=format&fit=crop" }
-];
+const INITIAL_EVENTS: PublicEvent[] = [];
 
-const INITIAL_BLOGS: CommunityBlog[] = [{
-  id: "BLOG-CEO-1", title: "Global Node Expansion Milestone",
-  senderName: "EduIgnite CEO", senderRole: "CEO",
-  senderAvatar: "https://picsum.photos/seed/ceo/150/150",
-  image: "https://images.unsplash.com/photo-1523050335392-9bc56751f11b?q=80&w=2070&auto=format&fit=crop",
-  paragraphs: ["Today marks a significant milestone.", "Our mission remains clear."],
-  createdAt: new Date(Date.now() - 86400000)
-}];
+const INITIAL_BLOGS: CommunityBlog[] = [];
 
 export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [platformSettings, setPlatformSettings] = useState<PlatformSettings>(PLATFORM_DEFAULTS);

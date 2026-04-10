@@ -74,9 +74,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (c.id === id) {
         setPersonalChats(pc => [...pc, {
           id: `MSG-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-          senderId: "mock_EDUI26CEO001", senderName: "EduIgnite CEO",
-          senderRole: "CEO", senderAvatar: "https://picsum.photos/seed/ceo/150/150",
-          receiverId: c.uid, text: `Dear ${c.userName}, verified! Love, CEO.`,
+          senderId: "system", senderName: "Platform Team",
+          senderRole: "SYSTEM", senderAvatar: "",
+          receiverId: c.uid, text: `Hello ${c.userName}, your contribution has been verified.`,
           timestamp: new Date().toLocaleTimeString(), isOfficial: true
         }]);
         return { ...c, status: "Verified" };

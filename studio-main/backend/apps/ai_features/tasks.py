@@ -76,9 +76,9 @@ def generate_weekly_insights():
     Runs weekly to create performance summaries and alerts.
     """
     try:
-        from schools.models import School
-        from students.models import Student
-        from academics.models import Grade
+        from apps.schools.models import School
+        from apps.students.models import Student
+        from apps.grades.models import Grade
 
         schools = School.objects.all()
         insights_created = 0
@@ -117,16 +117,16 @@ def generate_weekly_insights():
                 insights_created += 1
 
             # Check for attendance alerts
-            from attendance.models import Attendance
+            from apps.attendance.models import AttendanceRecord
 
             low_attendance_students = []
             students = Student.objects.filter(school=school)
 
             for student in students:
-                week_ago = timezone.now() - timedelta(days=7)
-                attendance_records = Attendance.objects.filter(
+                week_ago = (timezone.now() - timedelta(days=7)).date()
+                attendance_records = AttendanceRecord.objects.filter(
                     student=student,
-                    date__gte=week_ago
+                    session__date__gte=week_ago
                 )
 
                 if attendance_records.exists():
@@ -174,7 +174,7 @@ def reset_monthly_ai_quotas():
     Runs on the first day of each month.
     """
     try:
-        from users.models import User
+        from apps.users.models import User
 
         # Reset ai_request_count
         User.objects.all().update(ai_request_count=0)
@@ -200,9 +200,9 @@ def predict_dropout_risk():
     Creates risk alerts for intervention.
     """
     try:
-        from students.models import Student
-        from academics.models import Grade
-        from attendance.models import Attendance
+        from apps.students.models import Student
+        from apps.grades.models import Grade
+        from apps.attendance.models import AttendanceRecord
 
         at_risk_students = []
 
@@ -212,10 +212,10 @@ def predict_dropout_risk():
             risk_score = 0
 
             # Check attendance (30% weight)
-            thirty_days_ago = timezone.now() - timedelta(days=30)
-            attendance_records = Attendance.objects.filter(
+            thirty_days_ago = (timezone.now() - timedelta(days=30)).date()
+            attendance_records = AttendanceRecord.objects.filter(
                 student=student,
-                date__gte=thirty_days_ago
+                session__date__gte=thirty_days_ago
             )
 
             if attendance_records.exists():
@@ -229,7 +229,7 @@ def predict_dropout_risk():
             # Check grades (40% weight)
             recent_grades = Grade.objects.filter(
                 student=student
-            ).order_by('-created_at')[:5]
+            ).order_by('-created')[:5]
 
             if recent_grades.exists():
                 avg_grade = sum([g.score for g in recent_grades]) / len(recent_grades)

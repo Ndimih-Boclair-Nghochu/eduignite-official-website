@@ -52,12 +52,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useRouter } from "next/navigation";
 
 // Mock Subjects for Automatic Teacher Suggestion
-const SUBJECT_METADATA = [
-  { name: "Mathematics", teacher: "Prof. Sarah Smith", id: "MAT101" },
-  { name: "Advanced Physics", teacher: "Dr. Aris Tesla", id: "PHY101" },
-  { name: "English Literature", teacher: "Ms. Bennet", id: "LIT101" },
-  { name: "General Chemistry", teacher: "Dr. White", id: "CHM101" },
-];
+const SUBJECT_METADATA: any[] = [];
 
 const ANGLOPHONE_CLASSES = ["Form 1", "Form 2", "Form 3", "Form 4", "Form 5", "Lower Sixth", "Upper Sixth"];
 const FRANCOPHONE_CLASSES = ["6ème", "5ème", "4ème", "3ème", "2nde", "1ère", "Terminale"];
@@ -65,64 +60,17 @@ const TECHNICAL_CLASSES = ["1ère Year", "2nd Year", "3rd Year", "4th Year", "5t
 
 const ALL_CLASSES = [...ANGLOPHONE_CLASSES, ...FRANCOPHONE_CLASSES, ...TECHNICAL_CLASSES];
 
-const ROOM_CATEGORIES = [
-  { label: "Main Halls", rooms: ["Hall A", "Hall B", "Grand Auditorium"] },
-  { label: "Laboratories", rooms: ["Science Lab 1", "Chemistry Wing", "Tech Workshop"] },
-  { label: "Standard Classrooms", rooms: ["Room 402", "Room 305", "Library Wing"] },
-];
+const ROOM_CATEGORIES: any[] = [];
 
 const EXAM_TYPES = ["Sequence Assessment", "Mid-Term Evaluation", "End of Term Examination", "Mock Exam"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const TIME_SLOTS = ["08:00 AM", "09:30 AM", "11:00 AM", "01:00 PM", "02:30 PM"];
 
-const MOCK_ONLINE_EXAMS = [
-  { 
-    id: "E001", 
-    title: "Quantum Mechanics Mid-Term", 
-    subject: "Advanced Physics", 
-    teacher: "Dr. Tesla", 
-    startTime: new Date(Date.now() + 86400000).toISOString(), 
-    endTime: new Date(Date.now() + 86400000 + 3600000).toISOString(),
-    duration: 45, 
-    questionCount: 20,
-    status: "upcoming",
-    instructions: "1. Ensure a stable internet connection. 2. Diagrams must be studied carefully before answering. 3. No external calculators allowed."
-  },
-  { 
-    id: "E002", 
-    title: "Calculus Differentiation Quiz", 
-    subject: "Mathematics", 
-    teacher: "Prof. Smith", 
-    startTime: new Date(Date.now() - 1800000).toISOString(), 
-    endTime: new Date(Date.now() + 1800000).toISOString(), 
-    duration: 30, 
-    questionCount: 15,
-    status: "active",
-    instructions: "Answer all questions correctly. Focus on limits and derivatives."
-  },
-  { 
-    id: "E003", 
-    title: "English Vocabulary Speedrun", 
-    subject: "English Literature", 
-    teacher: "Ms. Bennet", 
-    startTime: new Date(Date.now() - 7200000).toISOString(), 
-    endTime: new Date(Date.now() - 3600000).toISOString(), 
-    duration: 15, 
-    questionCount: 10,
-    status: "cancelled",
-    instructions: "Cancelled due to technical maintenance."
-  }
-];
+const MOCK_ONLINE_EXAMS: any[] = [];
 
-const MOCK_EXAM_HISTORY = [
-  { id: "H1", title: "Wave Motion Quiz", subject: "Physics", score: 18, total: 20, date: "May 12, 2024", teacher: "Dr. Tesla", status: "VERIFIED" },
-  { id: "H2", title: "Algebra Sequence 1", subject: "Mathematics", score: 15, total: 20, date: "April 28, 2024", teacher: "Prof. Smith", status: "VERIFIED" },
-  { id: "H3", title: "Inorganic Chemistry", subject: "Chemistry", score: 0, total: 20, date: "Yesterday", teacher: "Dr. White", status: "ABSENT" },
-];
+const MOCK_EXAM_HISTORY: any[] = [];
 
-const INITIAL_ONSITE_EXAMS = [
-  { id: 'OE1', title: 'Mathematics Paper 1', class: 'Form 5', room: 'Hall A', date: '2024-06-10', time: '08:00 AM', teacher: 'Prof. Sarah Smith', section: "Anglophone Section", status: 'Scheduled' },
-];
+const INITIAL_ONSITE_EXAMS: any[] = [];
 
 export default function ExamsPage() {
   const { user } = useAuth();
@@ -133,7 +81,7 @@ export default function ExamsPage() {
   const [isDrawingTimetable, setIsDrawingTimetable] = useState(false);
   const [isSchedulingOnsite, setIsSchedulingOnsite] = useState(false);
   const [viewingInstructions, setViewingInstructions] = useState<any>(null);
-  const [onsiteExams, setOnsiteExams] = useState(INITIAL_ONSITE_EXAMS);
+  const [onsiteExams, setOnsiteExams] = useState<any[]>(INITIAL_ONSITE_EXAMS as any[]);
   
   const isSchoolAdmin = user?.role === "SCHOOL_ADMIN";
   const isSubAdmin = user?.role === "SUB_ADMIN";
@@ -197,7 +145,7 @@ export default function ExamsPage() {
     return SUBJECT_METADATA;
   }, [isTeacher]);
 
-  const [timetableFormData, setTimetableFormData] = useState({
+  const [timetableFormData, setTimetableFormData] = useState<any>({
     class: "",
     subject: "",
     day: "",
@@ -206,7 +154,7 @@ export default function ExamsPage() {
     teacher: ""
   });
 
-  const [onsiteFormData, setOnsiteFormData] = useState({
+  const [onsiteFormData, setOnsiteFormData] = useState<any>({
     title: "",
     type: "Sequence Assessment",
     subject: "",

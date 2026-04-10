@@ -8,4 +8,5 @@ router = DefaultRouter()
 router.register(r'orders', OrderViewSet, basename='order')
 
 urlpatterns = [
-    path('', incl
+    path('', include(router.urls)),
+]

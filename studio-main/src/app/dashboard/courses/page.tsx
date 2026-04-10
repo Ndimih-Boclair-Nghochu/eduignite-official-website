@@ -60,63 +60,11 @@ const SECTION_CLASSES: Record<string, string[]> = {
   "Technical Section": ["1ère Year", "2nd Year", "3rd Year", "4th Year", "5th Year", "6th Year", "7th Year"]
 };
 
-const MOCK_TEACHERS = [
-  { name: "Dr. Aris Tesla", avatar: "https://picsum.photos/seed/t1/200/200" },
-  { name: "Prof. Sarah Smith", avatar: "https://picsum.photos/seed/t2/200/200" },
-  { name: "Ms. Bennet", avatar: "https://picsum.photos/seed/t3/200/200" },
-  { name: "Mr. Abena", avatar: "https://picsum.photos/seed/t4/200/200" },
-  { name: "Dr. White", avatar: "https://picsum.photos/seed/t5/200/200" },
-];
+const MOCK_TEACHERS: any[] = [];
 
-const INITIAL_COURSES = [
-  { id: "PHY101", name: "Advanced Physics", instructorName: "Dr. Aris Tesla", instructorAvatar: "https://picsum.photos/seed/t1/200/200", targetClass: "2nde / Form 5", section: "Anglophone Section", type: "mandatory", coefficient: 4, color: "bg-blue-500", stats: { exams: 8, attendance: 92, liveScheduled: 12, liveCompleted: 10, liveCancelled: 2 } },
-  { id: "MAT101", name: "Mathematics", instructorName: "Prof. Sarah Smith", instructorAvatar: "https://picsum.photos/seed/t2/200/200", targetClass: "2nde / Form 5", section: "Anglophone Section", type: "mandatory", coefficient: 5, color: "bg-emerald-500", stats: { exams: 12, attendance: 95, liveScheduled: 15, liveCompleted: 14, liveCancelled: 1 } },
-  { id: "LIT105", name: "Modern Literature", instructorName: "Ms. Bennet", instructorAvatar: "https://picsum.photos/seed/t3/200/200", targetClass: "2nde / Form 5", section: "Anglophone Section", type: "optional", coefficient: 3, color: "bg-purple-500", stats: { exams: 4, attendance: 88, liveScheduled: 8, liveCompleted: 6, liveCancelled: 2 } },
-  { id: "ART202", name: "Fine Arts & Design", instructorName: "Mr. Abena", instructorAvatar: "https://picsum.photos/seed/t4/200/200", targetClass: "2nde / Form 5", section: "Francophone Section", type: "optional", coefficient: 2, color: "bg-rose-500", stats: { exams: 2, attendance: 90, liveScheduled: 4, liveCompleted: 4, liveCancelled: 0 } },
-];
+const INITIAL_COURSES: any[] = [];
 
-const INITIAL_MATERIALS = [
-  { 
-    id: "M1", 
-    title: "Kinematics Summary", 
-    description: "A comprehensive summary of displacement, velocity, and acceleration concepts.",
-    type: "pdf", 
-    date: "2024-05-10", 
-    size: "2.4 MB", 
-    subjectId: "PHY101",
-    fileUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-  },
-  { 
-    id: "M2", 
-    title: "Thermodynamics Lecture Note", 
-    description: "Document covering the Laws of Thermodynamics.",
-    type: "pdf", 
-    date: "2024-05-12", 
-    size: "1.2 MB", 
-    subjectId: "PHY101",
-    fileUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-  },
-  { 
-    id: "M3", 
-    title: "Vector Calculus Diagrams", 
-    description: "Visual aids for 3D coordinate systems and vector projections.",
-    type: "image", 
-    date: "2024-05-14", 
-    size: "1.8 MB", 
-    subjectId: "MAT101",
-    fileUrl: "https://picsum.photos/seed/math-vectors/1200/800"
-  },
-  { 
-    id: "M4", 
-    title: "Class Project Guidelines", 
-    description: "Submission requirements and rubric for the end-of-term project.",
-    type: "document", 
-    date: "2024-05-15", 
-    size: "0.5 MB", 
-    subjectId: "PHY101",
-    fileUrl: "https://www.w3.org/TR/PNG/iso_8859-1.txt"
-  }
-];
+const INITIAL_MATERIALS: any[] = [];
 
 export default function CoursesPage() {
   const { user, platformSettings } = useAuth();

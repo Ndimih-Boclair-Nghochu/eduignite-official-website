@@ -42,13 +42,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
-const MOCK_STUDENTS = [
-  { id: "S001", name: "Alice Thompson", class: "Form 5 / 2nde", section: "Anglophone Section", avatar: "https://picsum.photos/seed/s1/200/200", dob: "15/05/2008", guardian: "Mr. Robert Thompson", guardianPhone: "+237 677 00 11 22", address: "Bonapriso, Douala", status: "Active" },
-  { id: "S002", name: "Bob Richards", class: "Upper Sixth / Terminale", section: "Anglophone Section", avatar: "https://picsum.photos/seed/s2/200/200", dob: "22/11/2006", guardian: "Mrs. Sarah Richards", guardianPhone: "+237 699 33 44 55", address: "Akwa, Douala", status: "Active" },
-  { id: "S003", name: "Charlie Davis", class: "Lower Sixth / 1ère", section: "Francophone Section", avatar: "https://picsum.photos/seed/s3/200/200", dob: "10/03/2007", guardian: "M. Paul Davis", guardianPhone: "+237 655 66 77 88", address: "Deido, Douala", status: "Active" },
-  { id: "S004", name: "Diana Prince", class: "Form 5 / 2nde", section: "Technical Section", avatar: "https://picsum.photos/seed/s4/200/200", dob: "05/01/2008", guardian: "Mrs. Prince", guardianPhone: "+237 6XX XX XX XX", address: "Logbessou, Douala", status: "Active" },
-  { id: "S005", name: "Ethan Hunt", class: "Upper Sixth / Terminale", section: "Technical Section", avatar: "https://picsum.photos/seed/s5/200/200", dob: "30/09/2006", guardian: "Mr. Hunt", guardianPhone: "+237 6YY YY YY YY", address: "Bonamoussadi, Douala", status: "Active" },
-];
+const MOCK_STUDENTS: any[] = [];
 
 const CLASSES = ["6ème / Form 1", "5ème / Form 2", "4ème / Form 3", "3ème / Form 4", "2nde / Form 5", "1ère / Lower Sixth", "Terminale / Upper Sixth"];
 const SECTIONS = ["Anglophone Section", "Francophone Section", "Technical Section"];
@@ -77,6 +71,9 @@ export default function IdCardsPage() {
         section: s.section || 'Unknown',
         avatar: s.user?.avatar,
         dob: s.date_of_birth || '',
+        guardian: s.guardian_name || '',
+        guardianPhone: s.guardian_phone || '',
+        address: s.address || '',
       }));
     }
     return MOCK_STUDENTS;

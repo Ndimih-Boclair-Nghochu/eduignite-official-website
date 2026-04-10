@@ -57,9 +57,10 @@ export function useGenerateStudyPlan() {
 
   return useMutation({
     mutationFn: (data: {
-      studentId: string;
+      studentId?: string;
       subjects: string[];
-      duration: number;
+      duration?: number;
+      weeks?: number;
     }) => aiService.generateStudyPlan(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: aiKeys.requestsList() });
@@ -75,7 +76,7 @@ export function useAnalyzeGrades() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { studentId: string; sequenceId: string }) =>
+    mutationFn: (data: { studentId?: string; sequenceId?: string }) =>
       aiService.analyzeGrades(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: aiKeys.requestsList() });
@@ -110,7 +111,7 @@ export function useExamPrep() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { studentId: string; examType: string; daysLeft: number }) =>
+    mutationFn: (data: { studentId?: string; examType?: string; daysLeft?: number; subject_id?: string; subjectId?: string }) =>
       aiService.generateExamPrepPlan(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: aiKeys.requestsList() });
@@ -126,7 +127,7 @@ export function useParentReport() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { studentId: string; period: string }) =>
+    mutationFn: (data: { studentId?: string; student_id?: string; period?: string }) =>
       aiService.generateParentReport(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: aiKeys.requestsList() });

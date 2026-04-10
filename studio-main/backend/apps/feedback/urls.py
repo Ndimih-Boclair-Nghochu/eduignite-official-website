@@ -8,4 +8,5 @@ router = DefaultRouter()
 router.register(r'feedback', FeedbackViewSet, basename='feedback')
 
 urlpatterns = [
-    path('', in
+    path('', include(router.urls)),
+]

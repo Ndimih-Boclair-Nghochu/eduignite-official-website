@@ -60,34 +60,7 @@ interface ChatMessage {
   avatar: string;
 }
 
-const MOCK_PARTICIPANTS = [
-  { name: "Alice Thompson", id: "GBHS26S001", avatar: "https://picsum.photos/seed/s1/100/100" },
-  { name: "Bob Richards", id: "GBHS26S002", avatar: "https://picsum.photos/seed/s2/100/100" },
-  { name: "Charlie Davis", id: "GBHS26S003", avatar: "https://picsum.photos/seed/s3/100/100" },
-  { name: "Diana Prince", id: "GBHS26S004", avatar: "https://picsum.photos/seed/s4/100/100" },
-  { name: "Ethan Hunt", id: "GBHS26S005", avatar: "https://picsum.photos/seed/s5/100/100" },
-  { name: "Fiona Gallagher", id: "GBHS26S006", avatar: "https://picsum.photos/seed/s6/100/100" },
-  { name: "George Miller", id: "GBHS26S007", avatar: "https://picsum.photos/seed/s7/100/100" },
-  { name: "Hannah Baker", id: "GBHS26S008", avatar: "https://picsum.photos/seed/s8/100/100" },
-  { name: "Ian Wright", id: "GBHS26S009", avatar: "https://picsum.photos/seed/s9/100/100" },
-  { name: "Julia Roberts", id: "GBHS26S010", avatar: "https://picsum.photos/seed/s10/100/100" },
-  { name: "Kevin Hart", id: "GBHS26S011", avatar: "https://picsum.photos/seed/s11/100/100" },
-  { name: "Lisa Kudrow", id: "GBHS26S012", avatar: "https://picsum.photos/seed/s12/100/100" },
-  { name: "Michael Jordan", id: "GBHS26S013", avatar: "https://picsum.photos/seed/s13/100/100" },
-  { name: "Nancy Wheeler", id: "GBHS26S014", avatar: "https://picsum.photos/seed/s14/100/100" },
-  { name: "Oscar Isaac", id: "GBHS26S015", avatar: "https://picsum.photos/seed/s15/100/100" },
-  { name: "Paul Rudd", id: "GBHS26S016", avatar: "https://picsum.photos/seed/s16/100/100" },
-  { name: "Quentin Blake", id: "GBHS26S017", avatar: "https://picsum.photos/seed/s17/100/100" },
-  { name: "Riley Reid", id: "GBHS26S018", avatar: "https://picsum.photos/seed/s18/100/100" },
-  { name: "Steve Rogers", id: "GBHS26S019", avatar: "https://picsum.photos/seed/s19/100/100" },
-  { name: "Tony Stark", id: "GBHS26S020", avatar: "https://picsum.photos/seed/s20/100/100" },
-  { name: "Ursula K", id: "GBHS26S021", avatar: "https://picsum.photos/seed/s21/100/100" },
-  { name: "Victor Von", id: "GBHS26S022", avatar: "https://picsum.photos/seed/s22/100/100" },
-  { name: "Wanda Maximoff", id: "GBHS26S023", avatar: "https://picsum.photos/seed/s23/100/100" },
-  { name: "Xavier Charles", id: "GBHS26S024", avatar: "https://picsum.photos/seed/s24/100/100" },
-  { name: "Yara Greyjoy", id: "GBHS26S025", avatar: "https://picsum.photos/seed/s25/100/100" },
-  { name: "Zane Malik", id: "GBHS26S026", avatar: "https://picsum.photos/seed/s26/100/100" },
-];
+const MOCK_PARTICIPANTS: any[] = [];
 
 export default function LiveClassRoomPage() {
   const params = useParams();
@@ -121,10 +94,7 @@ export default function LiveClassRoomPage() {
   const [isLiking, setIsLiking] = useState(false);
   const [isHandRaised, setIsHandRaised] = useState(false);
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: "1", sender: "Alice", role: "STUDENT", text: "Can you explain how you find the vertex?", time: "10:05 AM", isSelf: false, avatar: "https://picsum.photos/seed/s1/100/100" },
-    { id: "2", sender: "Bob", role: "STUDENT", text: "What happens when x = 2?", time: "10:07 AM", isSelf: false, avatar: "https://picsum.photos/seed/s2/100/100" },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const isTeacher = user?.role === "TEACHER" || user?.role === "SCHOOL_ADMIN" || user?.role === "SUB_ADMIN";
   const isOwnClass = liveClass?.teacher === user?.id || liveClass?.teacher_name === user?.name;
@@ -141,6 +111,7 @@ export default function LiveClassRoomPage() {
   const meetingUrl = liveClass?.meeting_url;
   const platform = liveClass?.platform ?? "jitsi";
   const enrolledCount = liveClass?.enrolled_count ?? 0;
+  const activeSpeakers = useMemo(() => MOCK_PARTICIPANTS.slice(0, 2), []);
 
   const handleStartClass = () => {
     startMutation.mutate(classId, {
@@ -377,7 +348,6 @@ export default function LiveClassRoomPage() {
             ) : (
               /* Upcoming or ended — show status screen */
               <div className="w-full h-full flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-[#252841] to-[#1a1c2e] relative">
-                <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/classroom/1200/800')] bg-cover bg-center opacity-10" />
                 <div className="relative z-10 text-center space-y-4 max-w-sm mx-4">
                   {isUpcoming ? (
                     <>
@@ -494,7 +464,7 @@ export default function LiveClassRoomPage() {
               <Zap className="w-3 h-3 text-secondary fill-secondary" /> Active Speakers
             </h3>
             <div className="grid grid-cols-1 gap-3">
-              {[{ name: "Tesla", role: "Instructor", avatar: "https://picsum.photos/seed/t1/200/200" }, { name: "Alice", role: "Student", avatar: "https://picsum.photos/seed/s1/200/200" }].map((p, i) => (
+              {activeSpeakers.map((p, i) => (
                 <div key={i} className="aspect-video bg-[#252841] rounded-2xl overflow-hidden relative border border-white/5 group">
                   <img src={p.avatar} alt={p.name} className="w-full h-full object-cover opacity-80" />
                   <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/60 backdrop-blur-md rounded text-[9px] font-black uppercase text-white flex items-center gap-2">

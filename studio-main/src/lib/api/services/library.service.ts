@@ -14,6 +14,10 @@ export const libraryService = {
     return data;
   },
 
+  async getBookCategories(params?: ListParams): Promise<PaginatedResponse<BookCategory>> {
+    return this.getCategories(params);
+  },
+
   async createCategory(categoryData: Partial<BookCategory>): Promise<BookCategory> {
     const { data } = await apiClient.post(API.LIBRARY.CATEGORIES, categoryData);
     return data;
@@ -75,20 +79,26 @@ export const libraryService = {
   },
 
   async issueBook(
-    bookId: string,
-    borrowerId: string,
-    dueDate: string
+    bookIdOrPayload: string | { bookId: string; borrowerId: string; dueDate: string },
+    borrowerId?: string,
+    dueDate?: string
   ): Promise<BookLoan> {
-    const { data } = await apiClient.post(API.LIBRARY.ISSUE(bookId), {
-      borrower: borrowerId,
-      due_date: dueDate,
+    const payload =
+      typeof bookIdOrPayload === 'string'
+        ? { bookId: bookIdOrPayload, borrowerId, dueDate }
+        : bookIdOrPayload;
+    const { data } = await apiClient.post(API.LIBRARY.ISSUE(payload.bookId), {
+      borrower: payload.borrowerId,
+      due_date: payload.dueDate,
     });
     return data;
   },
 
-  async returnBook(loanId: string, notes?: string): Promise<BookLoan> {
+  async returnBook(loanIdOrPayload: string | { loanId: string; notes?: string }, notes?: string): Promise<BookLoan> {
+    const loanId = typeof loanIdOrPayload === 'string' ? loanIdOrPayload : loanIdOrPayload.loanId;
+    const payloadNotes = typeof loanIdOrPayload === 'string' ? notes : loanIdOrPayload.notes;
     const { data } = await apiClient.post(API.LIBRARY.RETURN(loanId), {
-      notes,
+      notes: payloadNotes,
     });
     return data;
   },

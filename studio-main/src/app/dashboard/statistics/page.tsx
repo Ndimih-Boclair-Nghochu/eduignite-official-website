@@ -78,32 +78,13 @@ const ACADEMIC_YEARS = ["2023 / 2024", "2022 / 2023"];
 const TERMS = ["Term 1", "Term 2", "Term 3"];
 const SECTIONS = ["Anglophone Section", "Francophone Section", "Technical Section"];
 
-const PERFORMANCE_BY_CLASS = [
-  { name: 'Form 1', average: 14.2, students: 45, passRate: 88, revenue: "1.2M", arrears: "450k", attendance: 92 },
-  { name: 'Form 2', average: 12.8, students: 40, passRate: 75, revenue: "1.1M", arrears: "800k", attendance: 85 },
-  { name: 'Form 3', average: 15.5, students: 38, passRate: 92, revenue: "1.4M", arrears: "200k", attendance: 96 },
-  { name: 'Form 4', average: 13.1, students: 42, passRate: 80, revenue: "1.3M", arrears: "600k", attendance: 88 },
-  { name: 'Form 5', average: 16.4, students: 42, passRate: 95, revenue: "1.5M", arrears: "100k", attendance: 98 },
-];
+const PERFORMANCE_BY_CLASS = [];
 
-const TEACHER_PERFORMANCE = [
-  { name: "Dr. Aris Tesla", subject: "Physics", engagement: 98, passRate: 94, ranking: 1, avatar: "https://picsum.photos/seed/t1/100/100" },
-  { name: "Prof. Sarah Smith", subject: "Math", engagement: 95, passRate: 92, ranking: 2, avatar: "https://picsum.photos/seed/t2/100/100" },
-  { name: "Ms. Bennet", subject: "Literature", engagement: 88, passRate: 85, ranking: 3, avatar: "https://picsum.photos/seed/t3/100/100" },
-  { name: "Mr. Abena", subject: "Arts", engagement: 92, passRate: 82, ranking: 4, avatar: "https://picsum.photos/seed/t4/100/100" },
-];
+const TEACHER_PERFORMANCE = [];
 
-const STUDENT_MERIT_LIST = [
-  { name: "Alice Thompson", class: "Form 5", avg: 18.45, status: "Perfect", attendance: 100, avatar: "https://picsum.photos/seed/s1/100/100" },
-  { name: "Bob Richards", class: "Upper Sixth", avg: 17.92, status: "Good", attendance: 98, avatar: "https://picsum.photos/seed/s2/100/100" },
-  { name: "Charlie Davis", class: "Form 3", avg: 17.15, status: "Good", attendance: 95, avatar: "https://picsum.photos/seed/s3/100/100" },
-  { name: "Diana Prince", class: "Form 5", avg: 16.88, status: "Perfect", attendance: 100, avatar: "https://picsum.photos/seed/s4/100/100" },
-];
+const STUDENT_MERIT_LIST = [];
 
-const ATTENDANCE_ALERTS = [
-  { name: "John Doe", class: "Form 2", rate: 62, status: "Critical", trend: "down" },
-  { name: "Jane Smith", class: "L6", rate: 68, status: "Warning", trend: "stable" },
-];
+const ATTENDANCE_ALERTS = [];
 
 export default function StatisticsPage() {
   const { user, platformSettings } = useAuth();
@@ -123,27 +104,27 @@ export default function StatisticsPage() {
 
   // Strategic Metrics
   const stats = useMemo(() => ({
-    globalAvg: "14.25",
-    highestSchool: "18.45",
-    lowestSchool: "06.12",
-    passRate: "84%",
-    totalAssessments: "14,200",
-    totalStudents: "2,500",
-    totalRevenue: "22.45M",
-    totalArrears: "4.12M",
-    collectionRate: "82%",
-    expectedIntake: "26.5M",
-    avgFeePerStudent: "125k",
-    overallAttendance: "94.2%",
-    perfectAttendaceCount: 142,
-    criticalLowAttendance: 18,
-    staffPresence: "98.5%",
-    studentTeacherRatio: "21:1",
-    topSection: "Anglophone",
-    bottomSection: "Technical",
-    topClass: "Form 5",
-    bottomClass: "Form 2",
-    growthIndex: "+4.2%"
+    globalAvg: "0",
+    highestSchool: "0",
+    lowestSchool: "0",
+    passRate: "0%",
+    totalAssessments: "0",
+    totalStudents: "0",
+    totalRevenue: "0",
+    totalArrears: "0",
+    collectionRate: "0%",
+    expectedIntake: "0",
+    avgFeePerStudent: "0",
+    overallAttendance: "0%",
+    perfectAttendaceCount: 0,
+    criticalLowAttendance: 0,
+    staffPresence: "0%",
+    studentTeacherRatio: "0:0",
+    topSection: "—",
+    bottomSection: "—",
+    topClass: "—",
+    bottomClass: "—",
+    growthIndex: "0%"
   }), []);
 
   const handleGenerateReport = (scope: string) => {

@@ -28,31 +28,34 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        role = (user.role or '').upper()
         announcements = Announcement.objects.filter(
             Q(expires_at__isnull=True) | Q(expires_at__gte=timezone.now())
         )
 
-        if user.role == 'executive':
+        if role in ['CEO', 'CTO', 'COO', 'INV']:
             return announcements
-        elif user.role in ['school_admin', 'sub_admin']:
+        elif role in ['SCHOOL_ADMIN', 'SUB_ADMIN']:
             return announcements.filter(
                 Q(school=user.school) | Q(school__isnull=True)
             )
         else:
             return announcements.filter(
-                Q(
-                    school=user.school,
-                    Q(target='ALL') |
-                    Q(target='SCHOOL_ALL') |
-                    Q(target=user.role.upper()) |
-                    (Q(target='PERSONAL') & Q(target_user=user))
+                (
+                    Q(school=user.school) & (
+                        Q(target='ALL') |
+                        Q(target='SCHOOL_ALL') |
+                        Q(target=role) |
+                        (Q(target='PERSONAL') & Q(target_user=user))
+                    )
                 ) |
                 Q(school__isnull=True, target='ALL')
             )
 
     def check_permissions(self, request):
+        role = (request.user.role or '').upper()
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            if request.user.role not in ['school_admin', 'sub_admin', 'executive']:
+            if role not in ['SCHOOL_ADMIN', 'SUB_ADMIN', 'CEO', 'CTO', 'COO', 'INV']:
                 self.permission_denied(request)
         return super().check_permissions(request)
 
@@ -64,7 +67,8 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         user = self.request.user
-        if user != instance.sender and user.role not in ['school_admin', 'executive']:
+        role = (user.role or '').upper()
+        if user != instance.sender and role not in ['SCHOOL_ADMIN', 'CEO', 'CTO', 'COO', 'INV']:
             self.permission_denied(self.request)
         instance.delete()
 
@@ -94,7 +98,7 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def platform_wide(self, request):
         """Get platform-wide announcements (executive only)"""
-        if request.user.role != 'executive':
+        if (request.user.role or '').upper() not in ['CEO', 'CTO', 'COO', 'INV']:
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
         announcements = Announcement.objects.filter(school__isnull=True)

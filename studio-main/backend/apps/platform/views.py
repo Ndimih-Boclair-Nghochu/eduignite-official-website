@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -357,62 +357,3 @@ class PlatformStatsView(APIView):
 
         return Response(stats_data)
 
-
-class ClearDemoDataView(APIView):
-    """
-    POST /platform/clear-demo-data/
-
-    Deletes all seeded demo data (users with DEMO_ matricules, the demo school
-    and all cascaded records). Only accessible by SUPER_ADMIN or CEO.
-
-    Returns a summary of deleted records.
-    """
-
-    permission_classes = [IsAuthenticated, IsExecutive]
-
-    DEMO_MATRICULES = [
-        'EDUI26CEO001', 'EDUI26CTO001', 'EDUI26COO001', 'EDUI26INV001',
-        'GBHS26ADM001', 'GBHS26SUB001',
-        'GBHS26T001', 'GBHS26T002', 'GBHS26T003',
-        'GBHS26S001', 'GBHS26S002', 'GBHS26S003',
-        'GBHS26P001', 'GBHS26BRS001', 'GBHS26LIB001',
-    ]
-    DEMO_SCHOOL_SHORT_NAME = 'GBHS Deido'
-
-    def post(self, request, *args, **kwargs):
-        from apps.schools.models import School
-        from django.db import transaction
-
-        if request.user.role not in ('SUPER_ADMIN', 'CEO'):
-            return Response(
-                {'message': 'Only SUPER_ADMIN or CEO can clear demo data.'},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        with transaction.atomic():
-            summary = {}
-
-            # Delete demo school (cascades to students, grades, attendance, etc.)
-            schools_deleted, school_detail = School.objects.filter(
-                short_name=self.DEMO_SCHOOL_SHORT_NAME
-            ).delete()
-            summary['schools_deleted'] = schools_deleted
-            summary['school_cascade'] = {
-                k.split('.')[-1]: v for k, v in school_detail.items() if v
-            }
-
-            # Delete demo users (any remaining after cascade)
-            users_deleted, _ = User.objects.filter(
-                matricule__in=self.DEMO_MATRICULES
-            ).delete()
-            summary['users_deleted'] = users_deleted
-
-        logger.info(
-            f"Demo data cleared by {request.user.matricule} ({request.user.role}). "
-            f"Summary: {summary}"
-        )
-
-        return Response({
-            'message': 'Demo data cleared successfully.',
-            'summary': summary,
-        })

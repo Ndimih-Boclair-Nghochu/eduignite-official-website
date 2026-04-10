@@ -62,8 +62,8 @@ export function ParentDashboard() {
         {[
           { label: "Children Enrolled", value: `${children.length} Student${children.length !== 1 ? 's' : ''}`, icon: GraduationCap, color: "text-blue-600", bg: "bg-blue-50" },
           { label: "Family GPA Mean", value: `${familyGpaMean} / 20`, icon: Award, color: "text-amber-600", bg: "bg-amber-50" },
-          { label: "Attendance Avg", value: "96.5%", icon: ClipboardCheck, color: "text-purple-600", bg: "bg-purple-50" },
-          { label: "Compliance Status", value: "Active Node", icon: ShieldCheck, color: "text-green-600", bg: "bg-green-50" },
+          { label: "Attendance Avg", value: "0%", icon: ClipboardCheck, color: "text-purple-600", bg: "bg-purple-50" },
+          { label: "Compliance Status", value: "—", icon: ShieldCheck, color: "text-green-600", bg: "bg-green-50" },
         ].map((stat, i) => (
           <Card key={i} className="border-none shadow-sm group hover:shadow-md transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">

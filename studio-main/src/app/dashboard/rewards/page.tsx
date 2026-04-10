@@ -55,14 +55,7 @@ import Link from "next/link";
 const SECTIONS = ["Anglophone Section", "Francophone Section", "Technical Section"];
 const CLASSES = ["6ème / Form 1", "5ème / Form 2", "4ème / Form 3", "3ème / Form 4", "2nde / Form 5", "1ère / Lower Sixth", "Terminale / Upper Sixth"];
 
-const MOCK_STUDENTS = [
-  { id: "GBHS26S001", name: "Alice Thompson", class: "2nde / Form 5", section: "Anglophone Section", average: 18.45, avatar: "https://picsum.photos/seed/s1/100/100" },
-  { id: "GBHS26S002", name: "Bob Richards", class: "2nde / Form 5", section: "Anglophone Section", average: 14.20, avatar: "https://picsum.photos/seed/s2/100/100" },
-  { id: "GBHS26S003", name: "Charlie Davis", class: "4ème / Form 3", section: "Anglophone Section", average: 17.15, avatar: "https://picsum.photos/seed/s3/100/100" },
-  { id: "GBHS26S004", name: "Diana Prince", class: "2nde / Form 5", section: "Technical Section", average: 16.88, avatar: "https://picsum.photos/seed/s4/100/100" },
-  { id: "GBHS26S005", name: "Ethan Hunt", class: "1ère / Lower Sixth", section: "Francophone Section", average: 15.50, avatar: "https://picsum.photos/seed/s5/100/100" },
-  { id: "GBHS26S006", name: "Fiona Gallagher", class: "2nde / Form 5", section: "Anglophone Section", average: 12.00, avatar: "https://picsum.photos/seed/s6/100/100" },
-];
+const MOCK_STUDENTS: any[] = [];
 
 export default function AcademicRewardsPage() {
   const { user, platformSettings, updatePlatformSettings, staffRemarks } = useAuth();

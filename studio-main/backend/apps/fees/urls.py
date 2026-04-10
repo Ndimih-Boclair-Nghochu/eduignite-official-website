@@ -10,4 +10,5 @@ router.register(r'payments', PaymentViewSet, basename='payment')
 router.register(r'invoices', InvoiceViewSet, basename='invoice')
 
 urlpatterns = [
-    path('', includ
+    path('', include(router.urls)),
+]

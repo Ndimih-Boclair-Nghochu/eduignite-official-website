@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
-from users.models import User
+from apps.users.models import User
 from .models import Conversation, ConversationParticipant, Message
 
 

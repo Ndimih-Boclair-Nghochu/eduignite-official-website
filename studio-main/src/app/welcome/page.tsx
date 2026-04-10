@@ -84,13 +84,22 @@ export default function SchoolWelcomePage() {
   }
 
   const schoolDomain = (resolvedSchool.shortName || "node").toLowerCase();
+  const schoolLogo = resolvedSchool.logo?.trim() || null;
+  const schoolBanner = resolvedSchool.banner?.trim() || null;
+  const schoolInitial = resolvedSchool.name?.charAt(0)?.toUpperCase() || "S";
 
   return (
     <div className="min-h-screen bg-[#F0F2F5] selection:bg-secondary selection:text-primary flex flex-col items-center relative overflow-x-hidden">
       {/* 1. LOGO-FIRST BRANDING AT TOP */}
       <div className="w-full bg-white/80 backdrop-blur-xl border-b border-primary/5 py-8 flex flex-col items-center gap-4 shrink-0">
         <div className="w-24 h-24 md:w-32 bg-white rounded-[2.5rem] p-5 shadow-2xl flex items-center justify-center border-4 border-white ring-4 ring-primary/5 transition-transform hover:rotate-3">
-          <img src={resolvedSchool.logo} alt="Logo" className="w-full h-full object-contain" />
+          {schoolLogo ? (
+            <img src={schoolLogo} alt="Logo" className="w-full h-full object-contain" />
+          ) : (
+            <div className="w-full h-full rounded-[1.5rem] bg-primary/5 text-primary flex items-center justify-center font-black text-3xl">
+              {schoolInitial}
+            </div>
+          )}
         </div>
         <div className="text-center space-y-1">
           <div className="flex items-center justify-center gap-2">
@@ -112,11 +121,21 @@ export default function SchoolWelcomePage() {
         
         {/* 2. RESPONSIVE HERO BANNER */}
         <div className="relative w-full aspect-[21/9] md:aspect-[3/1] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-2xl border-4 border-white bg-slate-200 group">
-          <img 
-            src={resolvedSchool.banner} 
-            alt={resolvedSchool.name} 
-            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-          />
+          {schoolBanner ? (
+            <img
+              src={schoolBanner}
+              alt={resolvedSchool.name}
+              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary via-primary/90 to-secondary flex items-center justify-center">
+              <div className="text-center text-white px-6">
+                <Building2 className="w-14 h-14 mx-auto mb-4 text-white/80" />
+                <p className="text-xs font-black uppercase tracking-[0.35em] text-white/70">Institutional Node</p>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tighter mt-2">{resolvedSchool.name}</h2>
+              </div>
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
           
           <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white hidden sm:block">

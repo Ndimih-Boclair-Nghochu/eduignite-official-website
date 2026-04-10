@@ -10,6 +10,21 @@ from drf_spectacular.views import (
 )
 
 
+def root_view(request):
+    """Human-friendly root endpoint for local backend runs."""
+    return JsonResponse(
+        {
+            'name': 'EduIgnite API',
+            'status': 'ok',
+            'health': '/api/health/',
+            'api': '/api/v1/',
+            'docs': '/api/docs/',
+            'schema': '/api/schema/',
+            'redoc': '/api/redoc/',
+        }
+    )
+
+
 def health_check(request):
     """Lightweight health-check used by nginx and Docker healthchecks."""
     return JsonResponse({'status': 'ok'})
@@ -36,6 +51,7 @@ api_v1_patterns = [
 ]
 
 urlpatterns = [
+    path('', root_view, name='root'),
     path('admin/', admin.site.urls),
     path('api/health/', health_check, name='health_check'),
     path('api/v1/', include(api_v1_patterns)),

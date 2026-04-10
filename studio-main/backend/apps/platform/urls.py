@@ -6,7 +6,6 @@ from .views import (
     PublicEventViewSet,
     TutorialLinkViewSet,
     PlatformStatsView,
-    ClearDemoDataView,
 )
 
 app_name = 'platform'
@@ -20,5 +19,4 @@ urlpatterns = [
     path('', include(router.urls)),
     path('settings/', PlatformSettingsView.as_view(), name='settings'),
     path('stats/', PlatformStatsView.as_view(), name='stats'),
-    path('clear-demo-data/', ClearDemoDataView.as_view(), name='clear-demo-data'),
 ]

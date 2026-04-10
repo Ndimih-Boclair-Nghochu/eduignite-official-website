@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from datetime import timedelta
+from urllib.parse import urlparse, parse_qs
 from decouple import config, Csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -85,12 +86,75 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 ASGI_APPLICATION = 'config.asgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DB_CONN_MAX_AGE = config('DB_CONN_MAX_AGE', default=600, cast=int)
+DATABASE_URL = config('DATABASE_URL', default='')
+
+
+def parse_database_url(database_url: str) -> dict:
+    parsed = urlparse(database_url)
+    engine_map = {
+        'postgres': 'django.db.backends.postgresql',
+        'postgresql': 'django.db.backends.postgresql',
+        'pgsql': 'django.db.backends.postgresql',
+        'sqlite': 'django.db.backends.sqlite3',
     }
-}
+    engine = engine_map.get(parsed.scheme)
+    if not engine:
+        raise ValueError(f'Unsupported database scheme: {parsed.scheme}')
+
+    if engine == 'django.db.backends.sqlite3':
+        db_name = parsed.path[1:] if parsed.path.startswith('/') else parsed.path
+        return {
+            'ENGINE': engine,
+            'NAME': db_name or BASE_DIR / 'db.sqlite3',
+        }
+
+    query = parse_qs(parsed.query)
+    options = {}
+    if query.get('sslmode'):
+        options['sslmode'] = query['sslmode'][0]
+    elif config('DB_SSL_REQUIRE', default=False, cast=bool):
+        options['sslmode'] = 'require'
+
+    db_config = {
+        'ENGINE': engine,
+        'NAME': parsed.path.lstrip('/'),
+        'USER': parsed.username or '',
+        'PASSWORD': parsed.password or '',
+        'HOST': parsed.hostname or '',
+        'PORT': str(parsed.port or ''),
+        'CONN_MAX_AGE': DB_CONN_MAX_AGE,
+    }
+    if options:
+        db_config['OPTIONS'] = options
+    return db_config
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': parse_database_url(DATABASE_URL)
+    }
+elif config('DB_NAME', default=''):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER', default=''),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='5432'),
+            'CONN_MAX_AGE': DB_CONN_MAX_AGE,
+            'OPTIONS': {
+                'sslmode': 'require' if config('DB_SSL_REQUIRE', default=False, cast=bool) else 'prefer',
+            },
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -172,9 +236,6 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'SCHEMA_PATH_PREFIX': '/api/v1/',
-    'PREPROCESSING_HOOKS': [
-        'drf_spectacular.hooks.build_array_type_field_hook',
-    ],
     'ENUM_ADD_UNDERSCORES': True,
     'COMPONENT_SPLIT_REQUEST': True,
     'COMPONENT_DESCRIPTION_MAPPING': {
@@ -223,21 +284,47 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [
-                (
-                    config('REDIS_HOST', default='localhost'),
-                    config('REDIS_PORT', default=6379, cast=int),
-                )
-            ],
-            'capacity': 1500,
-            'expiry': 10,
+REDIS_URL = config('REDIS_URL', default='')
+REDIS_HOST = config('REDIS_HOST', default='')
+REDIS_PORT = config('REDIS_PORT', default=6379, cast=int)
+
+if REDIS_URL or REDIS_HOST:
+    redis_location = REDIS_URL or f'redis://{REDIS_HOST}:{REDIS_PORT}/1'
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [REDIS_URL or (REDIS_HOST, REDIS_PORT)],
+                'capacity': 1500,
+                'expiry': 10,
+            },
         },
-    },
-}
+    }
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': redis_location,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'CONNECTION_POOL_KWARGS': {
+                    'max_connections': 50,
+                    'retry_on_timeout': True,
+                },
+            },
+        }
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'eduignite-local-cache',
+        }
+    }
 
 CELERY_BROKER_URL = config(
     'CELERY_BROKER_URL',
@@ -254,20 +341,6 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_TASK_SOFT_TIME_LIMIT = 25 * 60
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': config('REDIS_URL', default='redis://127.0.0.1:6379/1'),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'CONNECTION_POOL_KWARGS': {
-                'max_connections': 50,
-                'retry_on_timeout': True,
-            },
-        },
-    }
-}
 
 LOGGING = {
     'version': 1,
@@ -424,4 +497,3 @@ SECURE_CONTENT_SECURITY_POLICY = {
 }
 
 X_FRAME_OPTIONS = 'DENY'
-                                                                                                                                                                                                                                                                                                                                                                                              

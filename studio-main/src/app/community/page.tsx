@@ -44,47 +44,10 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 
-const ALL_VOICES = [
-  {
-    id: "v1",
-    name: "Alice Thompson",
-    role: "STUDENT",
-    schoolName: "GBHS Deido",
-    profileImage: "https://picsum.photos/seed/s1/150/150",
-    message: "The digital report cards are so professional! My parents are very happy with the transparency. It has really changed how we track our progress during the sequence evaluations.",
-    stars: 5
-  },
-  {
-    id: "v2",
-    name: "Principal Fonka",
-    role: "SCHOOL_ADMIN",
-    schoolName: "Lycée de Joss",
-    profileImage: "https://picsum.photos/seed/p1/150/150",
-    message: "Managing a school of 2,500 students has never been easier. The Governance Logs give me total control and the ability to audit every pedagogical action in real-time.",
-    stars: 5
-  },
-  {
-    id: "v3",
-    name: "Mr. Robert Thompson",
-    role: "PARENT",
-    schoolName: "GBHS Deido",
-    profileImage: "https://picsum.photos/seed/pa1/150/150",
-    message: "No more queues at the bursary. I pay fees from my phone and get a verified receipt instantly. The peace of mind this brings to busy parents is simply unmatched.",
-    stars: 5
-  },
-  {
-    id: "v4",
-    name: "Dr. Aris Tesla",
-    role: "TEACHER",
-    schoolName: "GBHS Deido",
-    profileImage: "https://picsum.photos/seed/t1/150/150",
-    message: "The AI feedback tool saves me hours of grading. I can provide personalized guidance to every student while maintaining high academic standards.",
-    stars: 5
-  }
-];
+const ALL_VOICES: any[] = [];
 
-const Row1 = ALL_VOICES.slice(0, 2);
-const Row2 = ALL_VOICES.slice(2, 4);
+const Row1: any[] = [];
+const Row2: any[] = [];
 
 export default function CommunityTestimonyPage() {
   const [mounted, setMounted] = useState(false);

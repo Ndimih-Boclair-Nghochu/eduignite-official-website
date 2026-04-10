@@ -25,13 +25,19 @@ export const supportService = {
     return data;
   },
 
-  async verifySupport(id: string): Promise<SupportContribution> {
+  async verifySupport(idOrPayload: string | { id: string }): Promise<SupportContribution> {
+    const id = typeof idOrPayload === 'string' ? idOrPayload : idOrPayload.id;
     const { data } = await apiClient.post(API.SUPPORT.VERIFY(id), {});
     return data;
   },
 
-  async rejectSupport(id: string, reason?: string): Promise<SupportContribution> {
-    const { data } = await apiClient.post(API.SUPPORT.REJECT(id), { reason });
+  async rejectSupport(
+    idOrPayload: string | { id: string; reason?: string },
+    reason?: string
+  ): Promise<SupportContribution> {
+    const id = typeof idOrPayload === 'string' ? idOrPayload : idOrPayload.id;
+    const payloadReason = typeof idOrPayload === 'string' ? reason : idOrPayload.reason;
+    const { data } = await apiClient.post(API.SUPPORT.REJECT(id), { reason: payloadReason });
     return data;
   },
 

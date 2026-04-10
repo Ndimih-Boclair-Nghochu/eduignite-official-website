@@ -31,9 +31,9 @@ const gradesKeys = {
   lists: () => [...gradesKeys.all, 'list'] as const,
   list: (params?: PaginationParams) =>
     [...gradesKeys.lists(), { ...params }] as const,
-  reportCard: (studentId: string, sequenceId: string) =>
+  reportCard: (studentId = "", sequenceId = "") =>
     [...gradesKeys.all, 'report-card', studentId, sequenceId] as const,
-  classResults: (className: string, sequenceId: string) =>
+  classResults: (className = "", sequenceId = "") =>
     [...gradesKeys.all, 'class-results', className, sequenceId] as const,
   termResults: (params?: PaginationParams) =>
     [...gradesKeys.all, 'term-results', { ...params }] as const,

@@ -73,6 +73,7 @@ export interface User {
   isLicensePaid: boolean;
   aiRequestCount?: number;
   annualAvg?: number;
+  annual_avg?: number;
 }
 
 export interface Testimony {
@@ -242,22 +243,46 @@ const DEFAULT_FEES: PlatformFees = {
 };
 
 const DEFAULT_TUTORIALS: TutorialLinks = {
-  STUDENT: "https://youtube.com/watch?v=eduignite-student",
-  TEACHER: "https://youtube.com/watch?v=eduignite-teacher",
-  PARENT: "https://youtube.com/watch?v=eduignite-parent",
-  SCHOOL_ADMIN: "https://youtube.com/watch?v=eduignite-admin",
-  SUB_ADMIN: "https://youtube.com/watch?v=eduignite-subadmin",
-  BURSAR: "https://youtube.com/watch?v=eduignite-bursar",
-  LIBRARIAN: "https://youtube.com/watch?v=eduignite-librarian",
+  STUDENT: "",
+  TEACHER: "",
+  PARENT: "",
+  SCHOOL_ADMIN: "",
+  SUB_ADMIN: "",
+  BURSAR: "",
+  LIBRARIAN: "",
 };
 
 const PLATFORM_DEFAULTS: PlatformSettings = {
   name: "EduIgnite",
-  logo: "https://picsum.photos/seed/eduignite-platform/200/200",
-  paymentDeadline: "2024-10-31",
+  logo: "",
+  paymentDeadline: "",
   fees: DEFAULT_FEES,
   tutorialLinks: DEFAULT_TUTORIALS,
   honourRollThreshold: 15.0,
+};
+
+const mapSchoolInfo = (school: any): SchoolInfo | undefined => {
+  if (!school) return undefined;
+  return {
+    id: school.id ?? "",
+    name: school.name ?? "",
+    shortName: school.shortName ?? school.short_name ?? "",
+    principal: school.principal ?? "",
+    motto: school.motto ?? "",
+    logo: school.logo ?? "",
+    banner: school.banner ?? "",
+    description: school.description ?? "",
+    location: school.location ?? "",
+    region: school.region ?? "",
+    division: school.division ?? "",
+    subDivision: school.subDivision ?? school.sub_division ?? "",
+    cityVillage: school.cityVillage ?? school.city_village ?? "",
+    address: school.address ?? "",
+    postalCode: school.postalCode ?? school.postal_code,
+    phone: school.phone ?? "",
+    email: school.email ?? "",
+    status: school.status ?? "",
+  };
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -279,7 +304,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const restoreSession = async () => {
-      const accessToken = localStorage.getItem("access_token");
+      const accessToken =
+        localStorage.getItem("eduignite_access_token") || localStorage.getItem("access_token");
       if (accessToken) {
         try {
           const user = await authService.getCurrentUser();
@@ -294,7 +320,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               role: (user.role as UserRole) || "STUDENT",
               schoolId: user.schoolId || null,
               avatar: user.avatar,
-              school: user.school,
+              school: mapSchoolInfo(user.school),
               isLicensePaid: user.isLicensePaid || false,
               aiRequestCount: user.aiRequestCount,
               annualAvg: user.annualAvg,
@@ -317,7 +343,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   role: (user.role as UserRole) || "STUDENT",
                   schoolId: user.schoolId || null,
                   avatar: user.avatar,
-                  school: user.school,
+              school: mapSchoolInfo(user.school),
                   isLicensePaid: user.isLicensePaid || false,
                   aiRequestCount: user.aiRequestCount,
                   annualAvg: user.annualAvg,
@@ -360,7 +386,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           role: (user.role as UserRole) || "STUDENT",
           schoolId: user.schoolId || null,
           avatar: user.avatar,
-          school: user.school,
+          school: mapSchoolInfo(user.school),
           isLicensePaid: user.isLicensePaid || false,
           aiRequestCount: user.aiRequestCount,
           annualAvg: user.annualAvg,
@@ -399,8 +425,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const markLicensePaid = async () => await updateUser({ isLicensePaid: true });
-  const incrementAiRequest = async () =>
-    userData && (await updateUser({ aiRequestCount: (userData.aiRequestCount || 0) + 1 }));
+  const incrementAiRequest = async () => {
+    if (!userData) return;
+    await updateUser({ aiRequestCount: (userData.aiRequestCount || 0) + 1 });
+  };
 
   const addTestimony = (t: Omit<Testimony, "id" | "status" | "createdAt">) =>
     setTestimonials((prev) => [
@@ -480,11 +508,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             {
               id: `MSG-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
               senderId: "system",
-              senderName: "EduIgnite CEO",
-              senderRole: "CEO",
-              senderAvatar: "https://picsum.photos/seed/ceo/150/150",
+              senderName: "Platform Team",
+              senderRole: "SYSTEM",
+              senderAvatar: "",
               receiverId: c.uid,
-              text: `Dear ${c.userName}, verified! Love, CEO.`,
+              text: `Hello ${c.userName}, your contribution has been verified.`,
               timestamp: new Date().toLocaleTimeString(),
               isOfficial: true,
             },

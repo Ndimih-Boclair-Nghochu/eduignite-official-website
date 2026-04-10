@@ -76,4 +76,7 @@ export const clearTokens = () => {
   localStorage.removeItem('eduignite_user');
 };
 
-export const getAccessToken = () => typeof window !== 'undefined' ? localStorage.getItem('eduignite_access_token') : null;
+export const getAccessToken = () =>
+  typeof window !== 'undefined'
+    ? localStorage.getItem('eduignite_access_token') || localStorage.getItem('access_token')
+    : null;

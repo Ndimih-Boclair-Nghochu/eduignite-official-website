@@ -219,5 +219,4 @@ export {
   useUnenrollFromClass,
   useStartClass,
   useEndClass,
-  useClearDemoData,
 } from './useLiveClasses';

@@ -20,22 +20,13 @@ import {
   Loader2,
   Lock,
   Fingerprint,
-  Crown,
-  GraduationCap,
-  Users,
-  Wallet,
-  Library,
-  Heart,
-  Sparkles,
   ExternalLink,
   ShieldCheck,
-  Zap,
-  Monitor,
   Mail,
   ArrowLeft,
   CheckCircle2,
-  ShieldAlert,
   Wifi,
+  Sparkles,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -49,48 +40,6 @@ import Link from "next/link";
 
 type AuthMode = "login" | "activate" | "forgot" | "otp" | "reset" | "success";
 
-const BOARD_DEMOS = [
-  { label: "CEO", matricule: "EDUI26CEO001", icon: Crown, color: "bg-primary text-secondary" },
-  { label: "CTO", matricule: "EDUI26CTO001", icon: Zap, color: "bg-indigo-600 text-white" },
-  { label: "COO", matricule: "EDUI26COO001", icon: Monitor, color: "bg-blue-600 text-white" },
-  {
-    label: "Investor",
-    matricule: "EDUI26INV001",
-    icon: Heart,
-    color: "bg-rose-600 text-white",
-  },
-  {
-    label: "Designer",
-    matricule: "EDUI26DES001",
-    icon: Sparkles,
-    color: "bg-cyan-600 text-white",
-  },
-];
-
-const SCHOOL_DEMOS = [
-  { label: "Admin", matricule: "GBHS26", icon: Building2, color: "bg-blue-600 text-white" },
-  {
-    label: "Sub-Admin",
-    matricule: "GBHS26A001",
-    icon: ShieldCheck,
-    color: "bg-cyan-600 text-white",
-  },
-  { label: "Teacher", matricule: "GBHS26T001", icon: Users, color: "bg-purple-600 text-white" },
-  {
-    label: "Student",
-    matricule: "GBHS26S001",
-    icon: GraduationCap,
-    color: "bg-emerald-600 text-white",
-  },
-  { label: "Bursar", matricule: "GBHS26B001", icon: Wallet, color: "bg-amber-600 text-white" },
-  {
-    label: "Librarian",
-    matricule: "GBHS26L001",
-    icon: Library,
-    color: "bg-indigo-600 text-white",
-  },
-  { label: "Parent", matricule: "GBHS26P001", icon: Heart, color: "bg-rose-600 text-white" },
-];
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -528,75 +477,6 @@ export default function LoginPage() {
           )}
         </Card>
 
-        {mode === "login" && (
-          <div className="w-full space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-1000 delay-200">
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="h-px flex-1 bg-primary/10" />
-                <h3 className="text-[10px] font-black uppercase text-primary/30 tracking-[0.4em]">
-                  Executive Board
-                </h3>
-                <div className="h-px flex-1 bg-primary/10" />
-              </div>
-              <div className="grid grid-cols-5 gap-3">
-                {BOARD_DEMOS.map((account) => (
-                  <Button
-                    key={account.matricule}
-                    variant="outline"
-                    className="h-auto py-4 px-1 flex-col gap-2 rounded-2xl border-white bg-white/40 backdrop-blur-md hover:bg-white hover:border-primary/20 transition-all group shadow-sm"
-                    onClick={() => handleQuickLogin(account.matricule)}
-                    disabled={isProcessing}
-                  >
-                    <div
-                      className={cn(
-                        "p-2 rounded-xl group-hover:scale-110 transition-transform shadow-md",
-                        account.color
-                      )}
-                    >
-                      <account.icon className="w-4 h-4" />
-                    </div>
-                    <span className="text-[8px] font-black uppercase tracking-tighter text-primary/60">
-                      {account.label}
-                    </span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="h-px flex-1 bg-primary/10" />
-                <h3 className="text-[10px] font-black uppercase text-primary/30 tracking-[0.4em]">
-                  Node Registry
-                </h3>
-                <div className="h-px flex-1 bg-primary/10" />
-              </div>
-              <div className="grid grid-cols-4 sm:grid-cols-7 gap-2.5">
-                {SCHOOL_DEMOS.map((account) => (
-                  <Button
-                    key={account.matricule}
-                    variant="outline"
-                    className="h-auto py-4 px-1 flex-col gap-2 rounded-2xl border-white bg-white/40 backdrop-blur-md hover:bg-white hover:border-primary/20 transition-all group shadow-sm"
-                    onClick={() => handleQuickLogin(account.matricule)}
-                    disabled={isProcessing}
-                  >
-                    <div
-                      className={cn(
-                        "p-2 rounded-xl group-hover:scale-110 transition-transform shadow-md",
-                        account.color
-                      )}
-                    >
-                      <account.icon className="w-4 h-4" />
-                    </div>
-                    <span className="text-[8px] font-black uppercase tracking-tighter text-primary/60">
-                      {account.label}
-                    </span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className="mt-4 flex flex-col items-center gap-4">
           <Button

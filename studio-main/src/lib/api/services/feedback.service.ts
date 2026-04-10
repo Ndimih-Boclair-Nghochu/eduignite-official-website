@@ -33,13 +33,20 @@ export const feedbackService = {
     return data;
   },
 
-  async resolveFeedback(id: string, note: string): Promise<Feedback> {
-    const { data } = await apiClient.post(API.FEEDBACK.RESOLVE(id), { note });
+  async resolveFeedback(idOrPayload: string | { id: string; note?: string }, note?: string): Promise<Feedback> {
+    const id = typeof idOrPayload === 'string' ? idOrPayload : idOrPayload.id;
+    const payloadNote = typeof idOrPayload === 'string' ? note : idOrPayload.note;
+    const { data } = await apiClient.post(API.FEEDBACK.RESOLVE(id), { note: payloadNote });
     return data;
   },
 
-  async respondToFeedback(id: string, message: string): Promise<Feedback> {
-    const { data } = await apiClient.post(API.FEEDBACK.RESPOND(id), { message });
+  async respondToFeedback(
+    idOrPayload: string | { id: string; message: string },
+    message?: string
+  ): Promise<Feedback> {
+    const id = typeof idOrPayload === 'string' ? idOrPayload : idOrPayload.id;
+    const payloadMessage = typeof idOrPayload === 'string' ? message : idOrPayload.message;
+    const { data } = await apiClient.post(API.FEEDBACK.RESPOND(id), { message: payloadMessage });
     return data;
   },
 

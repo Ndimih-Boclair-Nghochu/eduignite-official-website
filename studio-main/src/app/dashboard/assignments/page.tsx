@@ -52,46 +52,9 @@ import { useRouter } from "next/navigation";
 
 const CLASSES = ["6ème / Form 1", "5ème / Form 2", "4ème / Form 3", "3ème / Form 4", "2nde / Form 5", "1ère / Lower Sixth", "Terminale / Upper Sixth"];
 
-const MOCK_ASSIGNMENTS = [
-  {
-    id: "1",
-    title: "Newton's Laws Lab Report",
-    courseName: "Advanced Physics",
-    targetClass: "2nde / Form 5",
-    dueDate: new Date(Date.now() + 86400000 * 2).toISOString(),
-    maxMarks: 20,
-    status: "upcoming",
-    type: "both"
-  },
-  {
-    id: "2",
-    title: "Algebraic Expressions Set A",
-    courseName: "Mathematics",
-    targetClass: "2nde / Form 5",
-    dueDate: new Date(Date.now() - 86400000).toISOString(),
-    maxMarks: 20,
-    status: "missed",
-    type: "text"
-  },
-  {
-    id: "3",
-    title: "Introduction to Organic Chemistry",
-    courseName: "Chemistry",
-    targetClass: "2nde / Form 5",
-    dueDate: new Date(Date.now() + 86400000 * 5).toISOString(),
-    maxMarks: 20,
-    status: "submitted",
-    submittedAt: new Date().toISOString(),
-    submittedContent: "I have completed the analysis of carbon compounds as requested in the session notes.",
-    submittedFileName: "Chemistry_Report_V1.pdf",
-    type: "file"
-  }
-];
+const MOCK_ASSIGNMENTS: any[] = [];
 
-const MOCK_SUBMISSIONS = [
-  { id: "sub1", studentName: "Alice Thompson", studentId: "GBHS26S001", avatar: "https://picsum.photos/seed/s1/100/100", submittedAt: "2024-05-24T10:30:00Z", status: "pending", content: "I have finished the lab report on Newton's Laws. I found the friction part challenging but interesting.", fileName: "Lab_Report_Alice.pdf" },
-  { id: "sub2", studentName: "Bob Richards", studentId: "GBHS26S002", avatar: "https://picsum.photos/seed/s2/100/100", submittedAt: "2024-05-23T14:15:00Z", status: "graded", score: 18, content: "The acceleration calculations were performed using the standard formula. See attached data sheet.", fileName: "Data_Calculations.xlsx" },
-];
+const MOCK_SUBMISSIONS: any[] = [];
 
 export default function AssignmentsPage() {
   const { user } = useAuth();
@@ -266,7 +229,7 @@ export default function AssignmentsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {historyTasks.map((task) => (
+                    {historyTasks.map((task: any) => (
                       <TableRow key={task.id} className="hover:bg-accent/5 transition-colors border-b">
                         <TableCell className="pl-8 py-4 font-bold text-sm text-primary">{task.title}</TableCell>
                         <TableCell><Badge variant="outline" className="text-[10px] font-bold">{task.courseName}</Badge></TableCell>

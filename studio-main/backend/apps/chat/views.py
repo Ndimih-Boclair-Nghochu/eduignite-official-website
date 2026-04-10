@@ -17,7 +17,7 @@ from .serializers import (
     ParticipantSerializer
 )
 from .tasks import send_offline_notification
-from users.models import User
+from apps.users.models import User
 
 
 class MessageCursorPagination(CursorPagination):

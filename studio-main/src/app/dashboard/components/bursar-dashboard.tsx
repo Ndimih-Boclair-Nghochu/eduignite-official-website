@@ -81,7 +81,7 @@ export function BursarDashboard() {
         {[
           { label: "Net Collection", value: totalCollected, icon: Coins, color: "text-emerald-600", bg: "bg-emerald-50" },
           { label: "Outstanding Arrears", value: totalPending, icon: TrendingDown, color: "text-red-600", bg: "bg-red-50" },
-          { label: "Intake Efficiency", value: `${confirmedPayments > 0 ? '82.4%' : '0%'}`, icon: PieChart, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Intake Efficiency", value: "0%", icon: PieChart, color: "text-blue-600", bg: "bg-blue-50" },
           { label: "Transaction Count", value: `${confirmedPayments.toLocaleString()} Receipts`, icon: Receipt, color: "text-purple-600", bg: "bg-purple-50" },
         ].map((stat, i) => (
           <Card key={i} className="border-none shadow-sm group hover:shadow-md transition-all">

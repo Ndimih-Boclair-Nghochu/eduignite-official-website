@@ -24,7 +24,8 @@ export const ordersService = {
     return data;
   },
 
-  async processOrder(id: string): Promise<Order> {
+  async processOrder(idOrPayload: string | { id: string }): Promise<Order> {
+    const id = typeof idOrPayload === 'string' ? idOrPayload : idOrPayload.id;
     const { data } = await apiClient.post(API.ORDERS.PROCESS(id), {});
     return data;
   },

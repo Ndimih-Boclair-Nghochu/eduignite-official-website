@@ -8,22 +8,9 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-INSTALLED_APPS += [
-    'debug_toolbar',
-]
-
-MIDDLEWARE += [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-]
-
-INTERNAL_IPS = [
-    '127.0.0.1',
-    'localhost',
-]
+# django-debug-toolbar is omitted here: it injects HTML into browsable API/schema pages
+# and breaks with NoReverseMatch ('djdt') under ASGI/Daphne. Use Django admin, logs,
+# or drf-spectacular at /api/docs/ for inspection instead.
 
 LOGGING['loggers']['django']['level'] = 'DEBUG'
 LOGGING['loggers']['apps']['level'] = 'DEBUG'
-
-TEMPLATES[0]['OPTIONS']['context_processors'] += [
-    'django.template.context_processors.request',
-]

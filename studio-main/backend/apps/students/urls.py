@@ -9,4 +9,5 @@ router.register(r'students', StudentViewSet, basename='student')
 router.register(r'parent-student-links', ParentStudentLinkViewSet, basename='parent-student-link')
 
 urlpatterns = [
-    path('', in
+    path('', include(router.urls)),
+]

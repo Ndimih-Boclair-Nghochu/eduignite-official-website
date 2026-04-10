@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { liveClassesService, clearDemoData } from '@/lib/api/services/live-classes.service';
+import { liveClassesService } from '@/lib/api/services/live-classes.service';
 import type { CreateLiveClassRequest, ListParams } from '@/lib/api/types';
 
 // ─── Query key factory ────────────────────────────────────────────────────────
@@ -156,18 +156,6 @@ export function useEndClass() {
     onSuccess: (_, id) => {
       qc.invalidateQueries({ queryKey: lcKeys.detail(id) });
       qc.invalidateQueries({ queryKey: lcKeys.lists() });
-    },
-  });
-}
-
-/** Platform admin: delete all demo data */
-export function useClearDemoData() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: clearDemoData,
-    onSuccess: () => {
-      // Invalidate everything — demo data is gone
-      qc.clear();
     },
   });
 }

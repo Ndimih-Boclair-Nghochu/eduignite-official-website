@@ -85,7 +85,7 @@ export function TeacherDashboard() {
           { label: "Total Students", value: totalStudents, isLoading: studentsLoading, icon: Users, color: "text-purple-600", bg: "bg-purple-50" },
           { label: "Grades Entered", value: totalGradesEntered, isLoading: gradesLoading, icon: ListChecks, color: "text-amber-600", bg: "bg-amber-50" },
           { label: "Sessions Held", value: totalSessionsHeld, isLoading: sessionsLoading, icon: Activity, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Active Assignments", value: "3 Tasks", isLoading: false, icon: BookOpen, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Active Assignments", value: "0 Tasks", isLoading: false, icon: BookOpen, color: "text-blue-600", bg: "bg-blue-50" },
         ].map((stat, i) => (
           <Card key={i} className="border-none shadow-sm group hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -157,7 +157,7 @@ export function TeacherDashboard() {
               {classData.slice(0, 3).map((item, i) => (
                 <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-accent/20 border border-accent">
                   <span className="text-xs font-bold text-primary uppercase">{item.name}</span>
-                  <Badge variant="outline" className="border-primary/10 text-primary font-black">{item.average}</Badge>
+                  <Badge variant="outline" className="border-primary/10 text-primary font-black">{(item as any).average ?? (item as any).performance ?? 0}</Badge>
                 </div>
               ))}
             </div>

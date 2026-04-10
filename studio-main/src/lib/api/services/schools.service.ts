@@ -40,7 +40,7 @@ export const schoolsService = {
     await apiClient.delete(API.SCHOOLS.DETAIL(id));
   },
 
-  async toggleSchoolStatus(id: string): Promise<School> {
+  async toggleSchoolStatus(id: string, _data?: Record<string, unknown>): Promise<School> {
     const { data } = await apiClient.post(API.SCHOOLS.TOGGLE_STATUS(id), {});
     return data;
   },

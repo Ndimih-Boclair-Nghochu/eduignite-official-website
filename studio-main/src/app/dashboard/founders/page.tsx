@@ -67,19 +67,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-const MOCK_FOUNDERS = [
-  { id: "EduI24CEO001", name: "EduIgnite Founder", email: "ceo@eduignite.io", contact: "+237 600 00 00 01", shares: "40%", role: "CEO", status: "Active", isPrimary: true, avatar: "https://picsum.photos/seed/ceo/150/150", permissions: { manageSchools: true, manageTeam: true, viewAnalytics: true, manageSupport: true } },
-  { id: "EduI24CTO001", name: "Tech Director", email: "cto@eduignite.io", contact: "+237 600 00 00 02", shares: "15%", role: "CTO", status: "Active", isPrimary: false, avatar: "https://picsum.photos/seed/cto/150/150", permissions: { manageSchools: true, manageTeam: false, viewAnalytics: true, manageSupport: false } },
-  { id: "EduI24COO001", name: "Operations Lead", email: "coo@eduignite.io", contact: "+237 600 00 00 03", shares: "15%", role: "COO", status: "Active", isPrimary: false, avatar: "https://picsum.photos/seed/coo/150/150", permissions: { manageSchools: true, manageTeam: false, viewAnalytics: false, manageSupport: true } },
-];
+const MOCK_FOUNDERS: any[] = [];
 
-const EXECUTIVE_LOGS = [
-  { actor: "CEO", action: "Updated Global Pricing Policy", time: "Today, 08:45 AM", impact: "Strategic", icon: Crown, color: "text-primary" },
-  { actor: "CTO", action: "Authorized High-Availability Node Sync", time: "Yesterday", impact: "System", icon: Zap, color: "text-indigo-600" },
-  { actor: "COO", action: "Provisioned 4 New Institutional Nodes", time: "Yesterday", impact: "Operational", icon: Building2, color: "text-blue-600" },
-  { actor: "Designer", action: "Updated Public Portfolio Media", time: "2 days ago", impact: "Marketing", icon: Sparkles, color: "text-cyan-600" },
-  { actor: "Investor", action: "Accessed Quarterly Revenue Audit", time: "3 days ago", impact: "Financial", icon: Coins, color: "text-emerald-600" },
-];
+const EXECUTIVE_LOGS: any[] = [];
 
 export default function FoundersManagementPage() {
   const { user } = useAuth();
@@ -100,7 +90,7 @@ export default function FoundersManagementPage() {
     permissions: { manageSchools: false, manageTeam: false, viewAnalytics: true, manageSupport: false }
   });
 
-  const isCEO = user?.role === "CEO" || user?.role === "SUPER_ADMIN";
+  const isFounderOwner = ["SUPER_ADMIN", "CEO", "CTO"].includes(user?.role || "");
 
   // Fetch real executive users from API (CEO, CTO, COO, INV, DESIGNER)
   const { data: executivesData, isLoading: executivesLoading } = useExecutives();
@@ -116,10 +106,10 @@ export default function FoundersManagementPage() {
         role: u.role,
         avatar: u.avatar,
         permissions: {
-          manageSchools: ['CEO', 'COO', 'SUPER_ADMIN'].includes(u.role),
+          manageSchools: ['CEO', 'CTO', 'COO', 'SUPER_ADMIN'].includes(u.role),
           manageTeam: ['CEO', 'CTO', 'SUPER_ADMIN'].includes(u.role),
           viewAnalytics: true,
-          manageSupport: ['CEO', 'COO', 'SUPER_ADMIN'].includes(u.role),
+          manageSupport: ['CEO', 'CTO', 'COO', 'SUPER_ADMIN'].includes(u.role),
         },
       }));
       setFounders(mapped.length > 0 ? mapped : MOCK_FOUNDERS);
@@ -130,7 +120,7 @@ export default function FoundersManagementPage() {
   }, [executivesData, executivesLoading]);
 
   const handleAddFounder = async () => {
-    if (!isCEO || !newFounderData.name || !newFounderData.email) return;
+    if (!isFounderOwner || !newFounderData.name || !newFounderData.email) return;
     setIsProcessing(true);
     setTimeout(() => {
       const year = new Date().getFullYear().toString().slice(-2);
@@ -208,7 +198,7 @@ export default function FoundersManagementPage() {
           </h1>
           <p className="text-muted-foreground mt-1">Strategic oversight and global authority management.</p>
         </div>
-        {isCEO && (
+        {isFounderOwner && (
           <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2 shadow-xl h-14 px-8 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-xs">
@@ -291,7 +281,7 @@ export default function FoundersManagementPage() {
               "p-8 text-white text-center pb-12 relative transition-colors duration-500",
               founder.status === "Active" ? "bg-primary" : "bg-destructive/80"
             )}>
-              {isCEO && (
+              {isFounderOwner && (
                 <div className="absolute top-4 right-4">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

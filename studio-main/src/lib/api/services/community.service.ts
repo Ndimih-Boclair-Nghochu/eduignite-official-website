@@ -29,13 +29,19 @@ export const communityService = {
     return data;
   },
 
-  async approveTestimony(id: string): Promise<Testimony> {
+  async approveTestimony(idOrPayload: string | { id: string }): Promise<Testimony> {
+    const id = typeof idOrPayload === 'string' ? idOrPayload : idOrPayload.id;
     const { data } = await apiClient.post(API.COMMUNITY.APPROVE_TESTIMONY(id), {});
     return data;
   },
 
-  async rejectTestimony(id: string, reason?: string): Promise<Testimony> {
-    const { data } = await apiClient.post(API.COMMUNITY.REJECT_TESTIMONY(id), { reason });
+  async rejectTestimony(
+    idOrPayload: string | { id: string; reason?: string },
+    reason?: string
+  ): Promise<Testimony> {
+    const id = typeof idOrPayload === 'string' ? idOrPayload : idOrPayload.id;
+    const payloadReason = typeof idOrPayload === 'string' ? reason : idOrPayload.reason;
+    const { data } = await apiClient.post(API.COMMUNITY.REJECT_TESTIMONY(id), { reason: payloadReason });
     return data;
   },
 
@@ -59,7 +65,8 @@ export const communityService = {
     return data;
   },
 
-  async publishBlog(id: string): Promise<CommunityBlog> {
+  async publishBlog(idOrPayload: string | { id: string }): Promise<CommunityBlog> {
+    const id = typeof idOrPayload === 'string' ? idOrPayload : idOrPayload.id;
     const { data } = await apiClient.post(API.COMMUNITY.PUBLISH_BLOG(id), {});
     return data;
   },
@@ -80,6 +87,10 @@ export const communityService = {
     return data;
   },
 
+  async getBlogComments(blogId: string, params?: ListParams): Promise<PaginatedResponse<BlogComment>> {
+    return this.getComments(blogId, params);
+  },
+
   async getComment(id: string): Promise<BlogComment> {
     const { data } = await apiClient.get(API.COMMUNITY.COMMENT_DETAIL(id));
     return data;
@@ -91,6 +102,10 @@ export const communityService = {
       content,
     });
     return data;
+  },
+
+  async createBlogComment(payload: { blog_id: string; content: string }): Promise<BlogComment> {
+    return this.createComment(payload.blog_id, payload.content);
   },
 
   async deleteComment(id: string): Promise<void> {

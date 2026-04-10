@@ -272,7 +272,7 @@ export default function FeesPage() {
         <TabsList className="grid w-full mb-8 bg-white shadow-sm border h-auto p-1.5 rounded-2xl grid-cols-2 sm:grid-cols-4 sm:w-auto sm:max-w-[900px]">
           {isAdmin && <TabsTrigger value="oversight" className="gap-2 py-3 rounded-xl transition-all font-bold text-xs sm:text-sm"><Building2 className="w-4 h-4" /> Oversight</TabsTrigger>}
           {isBursar && <TabsTrigger value="ledger" className="gap-2 py-3 rounded-xl transition-all font-bold text-xs sm:text-sm"><Wallet className="w-4 h-4" /> Collection</TabsTrigger>}
-          <TabsTrigger value="history" className="gap-2 py-3 rounded-xl transition-all font-bold text-xs sm:text-sm"><History className="w-4 h-4" /> History</TabsTrigger>
+          <TabsTrigger value="history" className="gap-2 py-3 rounded-xl transition-all font-bold text-xs sm:text-sm"><Activity className="w-4 h-4" /> History</TabsTrigger>
           {isBursar && <TabsTrigger value="settings" className="gap-2 py-3 rounded-xl transition-all font-bold text-xs sm:text-sm"><Settings2 className="w-4 h-4" /> Fee Policy</TabsTrigger>}
         </TabsList>
 

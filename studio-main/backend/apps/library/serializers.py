@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import BookCategory, Book, BookLoan
-from users.models import User
+from apps.users.models import User
 from django.utils import timezone
 
 

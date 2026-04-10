@@ -44,13 +44,16 @@ export const feesService = {
     return data;
   },
 
-  async confirmPayment(id: string): Promise<Payment> {
+  async confirmPayment(idOrPayload: string | { id: string }): Promise<Payment> {
+    const id = typeof idOrPayload === 'string' ? idOrPayload : idOrPayload.id;
     const { data } = await apiClient.post(API.FEES.CONFIRM(id), {});
     return data;
   },
 
-  async rejectPayment(id: string, reason?: string): Promise<Payment> {
-    const { data } = await apiClient.post(API.FEES.REJECT(id), { reason });
+  async rejectPayment(idOrPayload: string | { id: string; reason?: string }, reason?: string): Promise<Payment> {
+    const id = typeof idOrPayload === 'string' ? idOrPayload : idOrPayload.id;
+    const payloadReason = typeof idOrPayload === 'string' ? reason : idOrPayload.reason;
+    const { data } = await apiClient.post(API.FEES.REJECT(id), { reason: payloadReason });
     return data;
   },
 

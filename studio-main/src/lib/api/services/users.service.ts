@@ -25,17 +25,19 @@ export const usersService = {
     return data;
   },
 
-  async updateProfile(data: UpdateUserRequest): Promise<User> {
-    const { data: response } = await apiClient.patch(API.USERS.ME, data);
+  async updateProfile(idOrData: string | UpdateUserRequest, data?: UpdateUserRequest): Promise<User> {
+    const payload = typeof idOrData === 'string' ? data ?? {} : idOrData;
+    const { data: response } = await apiClient.patch(API.USERS.ME, payload);
     return response;
   },
 
-  async updateRole(id: string, role: string): Promise<User> {
+  async updateRole(id: string, roleOrPayload: string | { role: string }): Promise<User> {
+    const role = typeof roleOrPayload === 'string' ? roleOrPayload : roleOrPayload.role;
     const { data } = await apiClient.patch(API.USERS.UPDATE_ROLE(id), { role });
     return data;
   },
 
-  async toggleLicense(id: string): Promise<User> {
+  async toggleLicense(id: string, _payload?: Record<string, unknown>): Promise<User> {
     const { data } = await apiClient.post(API.USERS.TOGGLE_LICENSE(id), {});
     return data;
   },
@@ -43,6 +45,10 @@ export const usersService = {
   async getStats(): Promise<PlatformStats> {
     const { data } = await apiClient.get(API.USERS.STATS);
     return data;
+  },
+
+  async getUserStats(): Promise<PlatformStats> {
+    return this.getStats();
   },
 
   async getExecutives(params?: ListParams): Promise<PaginatedResponse<User>> {

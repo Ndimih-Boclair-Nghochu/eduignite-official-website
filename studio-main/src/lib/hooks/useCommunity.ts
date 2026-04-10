@@ -75,7 +75,7 @@ export function useApproveTestimony() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: ApproveTestimonyRequest) =>
+    mutationFn: (data: ApproveTestimonyRequest | string) =>
       communityService.approveTestimony(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: communityKeys.pending() });
@@ -93,7 +93,7 @@ export function useRejectTestimony() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: RejectTestimonyRequest) =>
+    mutationFn: (data: RejectTestimonyRequest | string) =>
       communityService.rejectTestimony(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: communityKeys.pending() });
@@ -144,12 +144,13 @@ export function usePublishBlog() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: PublishBlogRequest) =>
+    mutationFn: (data: PublishBlogRequest | string) =>
       communityService.publishBlog(data),
     onSuccess: (_, variables) => {
+      const slug = typeof variables === "string" ? variables : variables.slug;
       queryClient.invalidateQueries({ queryKey: communityKeys.blogsList() });
       queryClient.invalidateQueries({
-        queryKey: communityKeys.blog(variables.slug),
+        queryKey: communityKeys.blog(slug),
       });
     },
   });
@@ -173,11 +174,13 @@ export function useCreateBlogComment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateBlogCommentRequest) =>
-      communityService.createBlogComment(data),
+    mutationFn: (data: CreateBlogCommentRequest | { blogId: string; content: string }) =>
+      communityService.createBlogComment(
+        "blogId" in data ? { blog_id: data.blogId, content: data.content } : data
+      ),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: communityKeys.comments(variables.blog_id),
+        queryKey: communityKeys.comments("blogId" in variables ? variables.blogId : variables.blog_id),
       });
     },
   });

@@ -6,11 +6,11 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 
-from users.models import User
-from students.models import Student
-from academics.models import Grade, Sequence
-from attendance.models import Attendance
-from schools.models import School
+from apps.users.models import User
+from apps.students.models import Student
+from apps.grades.models import Grade, Sequence
+from apps.attendance.models import AttendanceRecord
+from apps.schools.models import School
 
 from .models import AIRequest, AIInsight
 from .serializers import (
@@ -263,11 +263,11 @@ class AIRequestViewSet(viewsets.ModelViewSet):
                 )
 
             # Get attendance records
-            start_date = timezone.now() - timedelta(days=days)
-            attendance_records = Attendance.objects.filter(
+            start_date = (timezone.now() - timedelta(days=days)).date()
+            attendance_records = AttendanceRecord.objects.filter(
                 student=student,
-                date__gte=start_date
-            ).order_by('date')
+                session__date__gte=start_date
+            ).order_by('session__date')
 
             present = attendance_records.filter(status='present').count()
             absent = attendance_records.filter(status='absent').count()
@@ -331,7 +331,7 @@ class AIRequestViewSet(viewsets.ModelViewSet):
 
         # Get subject
         try:
-            from academics.models import Subject
+            from apps.grades.models import Subject
             subject = Subject.objects.get(id=subject_id)
         except Subject.DoesNotExist:
             return Response(

@@ -40,19 +40,9 @@ import { cn } from "@/lib/utils";
 const CLASSES = ["6ème / Form 1", "5ème / Form 2", "4ème / Form 3", "3ème / Form 4", "2nde / Form 5", "1ère / Lower Sixth", "Terminale / Upper Sixth"];
 const SECTIONS = ["Anglophone Section", "Francophone Section", "Technical Section"];
 
-const MOCK_STUDENTS = [
-  { id: "GBHS26S001", name: "Alice Thompson", class: "2nde / Form 5", section: "Anglophone Section", avatar: "https://picsum.photos/seed/s1/100/100", dob: "15/05/2008" },
-  { id: "GBHS26S002", name: "Bob Richards", class: "Terminale / Upper Sixth", section: "Anglophone Section", avatar: "https://picsum.photos/seed/s2/100/100", dob: "22/11/2006" },
-  { id: "GBHS26S003", name: "Charlie Davis", class: "1ère / Lower Sixth", section: "Francophone Section", avatar: "https://picsum.photos/seed/s3/100/100", dob: "10/03/2007" },
-  { id: "GBHS26S004", name: "Diana Prince", class: "2nde / Form 5", section: "Technical Section", avatar: "https://picsum.photos/seed/s4/100/100", dob: "05/01/2008" },
-];
+const MOCK_STUDENTS: any[] = [];
 
-const MOCK_TRANSCRIPT_DATA = {
-  "Advanced Physics": { f1: ["12.5", "13.0", "14.2"], f2: ["11.0", "12.5", "13.5"], f3: ["14.0", "15.5", "16.0"] },
-  "Mathematics": { f1: ["15.0", "16.5", "17.0"], f2: ["14.5", "15.0", "16.0"], f3: ["17.5", "18.0", "17.5"] },
-  "English": { f1: ["10.0", "11.5", "12.0"], f2: ["09.5", "10.0", "11.0"], f3: ["12.5", "13.0", "13.5"] },
-  "History": { f1: ["08.5", "09.0", "10.5"], f2: ["07.5", "08.0", "09.5"], f3: ["09.0", "10.5", "11.0"] }
-};
+const MOCK_TRANSCRIPT_DATA: Record<string, any> = {};
 
 export default function TranscriptsPage() {
   const { user, platformSettings } = useAuth();

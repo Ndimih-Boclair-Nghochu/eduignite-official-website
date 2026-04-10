@@ -18,7 +18,7 @@ def handle_offline_notification(sender, instance, created, **kwargs):
     """Send offline notifications when message is created."""
     if created and not instance.is_deleted:
         from .tasks import send_offline_notification
-        from users.models import User
+        from apps.users.models import User
 
         # Get conversation participants
         conversation = instance.conversation
