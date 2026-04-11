@@ -27,6 +27,8 @@ import {
   CheckCircle2,
   Wifi,
   Sparkles,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -50,6 +52,8 @@ export default function LoginPage() {
 
   const [mode, setAuthMode] = useState<AuthMode>("login");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [authData, setAuthData] = useState({
     matricule: "",
@@ -150,6 +154,8 @@ export default function LoginPage() {
   const switchMode = (newMode: AuthMode) => {
     if (isProcessing) return;
     clearAuthData();
+    setShowPassword(false);
+    setShowConfirmPassword(false);
     setAuthMode(newMode);
   };
 
@@ -313,15 +319,26 @@ export default function LoginPage() {
                             </button>
                           )}
                         </div>
-                        <Input
-                          required
-                          autoComplete="new-password"
-                          type="password"
-                          disabled={isProcessing}
-                          className="h-14 bg-accent/30 border-none rounded-2xl focus-visible:ring-primary font-bold text-center text-lg shadow-inner transition-all focus:bg-white"
-                          value={authData.password}
-                          onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
-                        />
+                        <div className="relative">
+                          <Input
+                            required
+                            autoComplete={mode === "activate" ? "new-password" : "current-password"}
+                            type={showPassword ? "text" : "password"}
+                            disabled={isProcessing}
+                            className="h-14 bg-accent/30 border-none rounded-2xl focus-visible:ring-primary font-bold text-center text-lg shadow-inner transition-all focus:bg-white px-12"
+                            value={authData.password}
+                            onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
+                          />
+                          <button
+                            type="button"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            disabled={isProcessing}
+                            className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-primary/50 transition-colors hover:text-primary disabled:opacity-50"
+                            onClick={() => setShowPassword((current) => !current)}
+                          >
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
                       </div>
                     </>
                   )}
@@ -331,17 +348,28 @@ export default function LoginPage() {
                       <Label className="text-[10px] uppercase font-black text-muted-foreground tracking-[0.2em] ml-1 flex items-center gap-2">
                         <ShieldCheck className="w-3.5 h-3.5 text-primary/40" /> {t("confirmPasswordLabel")}
                       </Label>
-                      <Input
-                        required
-                        autoComplete="new-password"
-                        type="password"
-                        disabled={isProcessing}
-                        className="h-14 bg-accent/30 border-none rounded-2xl focus-visible:ring-primary font-bold text-center text-lg shadow-inner transition-all focus:bg-white"
-                        value={authData.confirmPassword}
-                        onChange={(e) =>
-                          setAuthData({ ...authData, confirmPassword: e.target.value })
-                        }
-                      />
+                      <div className="relative">
+                        <Input
+                          required
+                          autoComplete="new-password"
+                          type={showConfirmPassword ? "text" : "password"}
+                          disabled={isProcessing}
+                          className="h-14 bg-accent/30 border-none rounded-2xl focus-visible:ring-primary font-bold text-center text-lg shadow-inner transition-all focus:bg-white px-12"
+                          value={authData.confirmPassword}
+                          onChange={(e) =>
+                            setAuthData({ ...authData, confirmPassword: e.target.value })
+                          }
+                        />
+                        <button
+                          type="button"
+                          aria-label={showConfirmPassword ? "Hide password confirmation" : "Show password confirmation"}
+                          disabled={isProcessing}
+                          className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-primary/50 transition-colors hover:text-primary disabled:opacity-50"
+                          onClick={() => setShowConfirmPassword((current) => !current)}
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -479,12 +507,14 @@ export default function LoginPage() {
           <Button
             asChild
             variant="ghost"
-            className="text-[10px] font-black uppercase tracking-widest text-primary/40 hover:text-primary gap-2 h-12 px-8 rounded-full bg-primary/5 border border-primary/5 hover:bg-primary/10 transition-all"
+            className="h-auto min-h-14 w-full max-w-sm rounded-[1.5rem] border border-primary/15 bg-white/90 px-5 py-4 text-primary shadow-lg transition-all hover:bg-white hover:text-primary sm:px-8"
           >
-            <Link href="/community">
-              <Sparkles className="w-4 h-4 text-secondary fill-secondary/20" />
-              {t("visitCommunityPortal")}
-              <ExternalLink className="w-3.5 h-3.5 ml-1 opacity-40" />
+            <Link href="/community" className="flex w-full items-center justify-center gap-3 text-center">
+              <Sparkles className="h-4 w-4 shrink-0 text-secondary fill-secondary/20" />
+              <span className="text-xs font-black uppercase tracking-[0.2em] leading-relaxed sm:text-[10px] sm:tracking-widest">
+                {t("visitCommunityPortal")}
+              </span>
+              <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-50" />
             </Link>
           </Button>
         </div>
