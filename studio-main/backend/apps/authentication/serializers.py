@@ -20,7 +20,7 @@ class LoginSerializer(serializers.Serializer):
     Serializer for matricule/password based login.
     """
     matricule = serializers.CharField(max_length=50)
-    password = serializers.CharField(max_length=128, required=False, allow_blank=True)
+    password = serializers.CharField(max_length=128, write_only=True)
 
     def validate_matricule(self, value):
         """Validate that user with matricule exists."""

@@ -136,7 +136,7 @@ interface I18nContextType {
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>("fr");
+  const [language, setLanguage] = useState<Language>("en");
 
   useEffect(() => {
     const savedLang = localStorage.getItem("edu-nexus-lang") as Language | null;

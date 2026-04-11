@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class MatriculeLoginView(APIView):
     """
     POST /auth/login/
-    Login with matricule (and optional password for future use).
+    Login with matricule and password.
     Returns access token, refresh token, and user profile.
     """
     permission_classes = [AllowAny]
@@ -38,14 +38,14 @@ class MatriculeLoginView(APIView):
             400: {'type': 'object', 'properties': {'detail': {'type': 'string'}}},
         },
         tags=['Authentication'],
-        description='Login with matricule and optional password',
+        description='Login with matricule and password',
     )
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         matricule = serializer.validated_data['matricule']
-        password = serializer.validated_data.get('password')
+        password = serializer.validated_data['password']
 
         try:
             user = User.objects.get(matricule=matricule)
@@ -61,7 +61,7 @@ class MatriculeLoginView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        if password and not user.check_password(password):
+        if not user.check_password(password):
             return Response(
                 {'detail': 'Invalid credentials'},
                 status=status.HTTP_401_UNAUTHORIZED,
