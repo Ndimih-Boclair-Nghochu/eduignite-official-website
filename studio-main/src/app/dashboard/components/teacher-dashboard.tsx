@@ -57,14 +57,14 @@ export function TeacherDashboard() {
   return (
     <div className="space-y-8 pb-20 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-start sm:items-center gap-4">
           <Avatar className="h-16 w-16 md:h-20 md:w-20 border-4 border-white shadow-xl shrink-0 ring-4 ring-primary/5">
             <AvatarImage src={user?.avatar} alt={user?.name} />
             <AvatarFallback className="bg-primary/5 text-primary text-2xl font-black">{user?.name?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-3xl font-bold text-primary font-headline tracking-tighter">Welcome back, {user?.name}</h1>
-            <div className="flex items-center gap-2 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary font-headline tracking-tighter leading-tight">Welcome back, {user?.name}</h1>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
               <Badge variant="secondary" className="bg-primary/5 text-primary border-none font-black uppercase text-[10px] h-5 px-3">
                 Pedagogical Lead
               </Badge>
@@ -74,7 +74,7 @@ export function TeacherDashboard() {
             </div>
           </div>
         </div>
-        <div className="bg-green-50 px-4 py-2 rounded-xl border border-green-100 flex items-center gap-3 shrink-0">
+        <div className="bg-green-50 px-4 py-2 rounded-xl border border-green-100 flex items-center gap-3 w-full sm:w-fit">
           <ShieldCheck className="w-5 h-5 text-green-600" />
           <p className="text-xs font-bold text-green-700">Digital Node Sync Active</p>
         </div>
@@ -109,7 +109,7 @@ export function TeacherDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <Card className="lg:col-span-8 border-none shadow-xl overflow-hidden rounded-[2rem] bg-white">
-          <CardHeader className="bg-primary/5 p-8 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <CardHeader className="bg-primary/5 p-5 sm:p-8 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-xl font-black text-primary uppercase tracking-tighter flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-secondary"/> Performance Velocity
@@ -117,7 +117,7 @@ export function TeacherDashboard() {
               <CardDescription>Aggregate student mean scores over current evaluation cycle.</CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="h-[350px] pt-10">
+          <CardContent className="h-[300px] sm:h-[350px] pt-6 sm:pt-10">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={DATA_PERIODS.monthly}>
                 <defs>
@@ -137,14 +137,14 @@ export function TeacherDashboard() {
         </Card>
 
         <Card className="lg:col-span-4 border-none shadow-xl overflow-hidden rounded-[2rem] bg-white flex flex-col">
-          <CardHeader className="bg-primary p-8 text-white">
+          <CardHeader className="bg-primary p-5 sm:p-8 text-white">
             <CardTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
               <Activity className="w-5 h-5 text-secondary" />
               Class Performance
             </CardTitle>
             <CardDescription className="text-white/60">Average scores per class.</CardDescription>
           </CardHeader>
-          <CardContent className="flex-1 pt-10">
+          <CardContent className="flex-1 pt-6 sm:pt-10">
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={classData}>
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold' }} />
@@ -167,7 +167,7 @@ export function TeacherDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <Card className="lg:col-span-7 border-none shadow-xl overflow-hidden rounded-[2rem] bg-white">
-          <CardHeader className="bg-white border-b p-8 flex items-center justify-between">
+          <CardHeader className="bg-white border-b p-5 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <CardTitle className="text-lg font-black text-primary uppercase flex items-center gap-2">
                 <PenTool className="w-5 h-5 text-secondary" />
@@ -209,7 +209,7 @@ export function TeacherDashboard() {
         </Card>
 
         <Card className="lg:col-span-5 border-none shadow-xl overflow-hidden rounded-[2rem] bg-white">
-          <CardHeader className="bg-secondary/20 p-8 flex items-center justify-between">
+          <CardHeader className="bg-secondary/20 p-5 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <CardTitle className="text-lg font-black text-primary uppercase flex items-center gap-2">
                 <Award className="w-5 h-5 text-primary" />

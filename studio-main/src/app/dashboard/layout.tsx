@@ -140,13 +140,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!isLicensePaid && !isPlatformExecutive && !isSubscriptionPage) {
     return (
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className="flex min-h-dvh flex-col md:flex-row bg-background">
         <aside className="hidden md:flex w-64 shrink-0 h-full">
           <DashboardSidebar />
         </aside>
-        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-accent/10">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-accent/10">
           <Card className="max-w-md w-full border-none shadow-2xl rounded-[2rem] overflow-hidden">
-            <CardHeader className="bg-primary p-8 text-white text-center">
+            <CardHeader className="bg-primary p-6 sm:p-8 text-white text-center">
               <div className="flex justify-center mb-4">
                 <div className="p-4 bg-white/10 rounded-full">
                   <Lock className="w-12 h-12 text-secondary" />
@@ -155,7 +155,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <CardTitle className="text-2xl font-black uppercase">Dashboard Locked</CardTitle>
               <CardDescription className="text-white/60">Annual Institutional License Required</CardDescription>
             </CardHeader>
-            <CardContent className="p-8 text-center space-y-6">
+            <CardContent className="p-6 sm:p-8 text-center space-y-6">
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Your account dashboard has been locked because the annual institutional license fee for the current academic session is outstanding. 
               </p>
@@ -180,13 +180,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const tutorialUrl = platformSettings?.tutorialLinks?.[user.role as keyof typeof platformSettings.tutorialLinks] || "https://youtube.com";
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex min-h-dvh flex-col md:flex-row bg-background">
       <aside className="hidden md:flex w-64 shrink-0 h-full">
         <DashboardSidebar />
       </aside>
 
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-primary text-white shrink-0">
+      <div className="flex-1 flex min-h-dvh flex-col overflow-hidden">
+        <header className="md:hidden sticky top-0 z-20 flex items-center justify-between gap-3 px-3 py-3 bg-primary/95 backdrop-blur text-white shrink-0">
           <div className="flex items-center gap-2 overflow-hidden">
             {!isPlatformExecutive && user?.school?.logo ? (
               <div className="w-6 h-6 rounded bg-white p-0.5 flex items-center justify-center shrink-0">
@@ -207,7 +207,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <Menu className="w-6 h-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 border-none w-64">
+            <SheetContent side="left" className="p-0 border-none w-[88vw] max-w-80">
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
               <DashboardSidebar onClose={() => setIsMobileMenuOpen(false)} />
             </SheetContent>
@@ -215,13 +215,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         <main className="flex-1 overflow-y-auto">
-          <div className="p-4 md:p-8 min-h-full flex flex-col">
-            <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 w-full flex-1">
+          <div className="px-3 py-4 sm:px-4 md:p-8 min-h-full flex flex-col">
+            <div className="max-w-7xl mx-auto space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 w-full flex-1">
               {children}
             </div>
 
             {!isPlatformExecutive && (
-              <footer className="mt-20 border-t pt-8 pb-12 w-full max-w-7xl mx-auto">
+              <footer className="mt-12 md:mt-20 border-t pt-8 pb-10 md:pb-12 w-full max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
@@ -251,7 +251,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </div>
 
                   <div className="flex flex-col md:items-end gap-4">
-                    <div className="bg-secondary/10 p-6 rounded-3xl border border-secondary/20 flex flex-col md:items-end text-center md:text-right space-y-3">
+                    <div className="bg-secondary/10 p-5 sm:p-6 rounded-3xl border border-secondary/20 flex flex-col md:items-end text-center md:text-right space-y-3">
                       <div>
                         <h4 className="font-black text-primary uppercase text-xs tracking-widest flex items-center md:justify-end gap-2 mb-1">
                           Community & Support <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" />
@@ -268,7 +268,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             </button>
                           </Button>
                           <DialogContent className="sm:max-w-md rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
-                            <DialogHeader className="bg-primary p-8 text-white relative">
+                            <DialogHeader className="bg-primary p-6 sm:p-8 text-white relative">
                               <div className="flex items-center gap-4">
                                 <div className="p-3 bg-white/10 rounded-2xl">
                                   <Quote className="w-8 h-8 text-secondary" />
@@ -282,7 +282,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 <X className="w-6 h-6" />
                               </Button>
                             </DialogHeader>
-                            <div className="p-8 space-y-6">
+                            <div className="p-5 sm:p-8 space-y-6">
                               <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Your Message</Label>
                                 <Textarea 
@@ -298,7 +298,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 <p className="text-[10px] text-muted-foreground italic">Your professional profile details will be attached to this submission.</p>
                               </div>
                             </div>
-                            <DialogFooter className="bg-accent/20 p-6 border-t border-accent">
+                            <DialogFooter className="bg-accent/20 p-5 sm:p-6 border-t border-accent">
                               <Button 
                                 className="w-full h-14 rounded-2xl shadow-xl font-black uppercase text-xs gap-3 bg-primary text-white hover:bg-primary/90" 
                                 onClick={handleTestimonySubmit}
@@ -319,7 +319,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             </button>
                           </Button>
                           <DialogContent className="sm:max-w-md rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
-                            <DialogHeader className="bg-primary p-8 text-white relative">
+                            <DialogHeader className="bg-primary p-6 sm:p-8 text-white relative">
                               <div className="flex items-center gap-4">
                                 <div className="p-3 bg-white/10 rounded-2xl">
                                   <Heart className="w-8 h-8 text-secondary fill-secondary/20" />
@@ -333,7 +333,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 <X className="w-6 h-6" />
                               </Button>
                             </DialogHeader>
-                            <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto">
+                            <div className="p-5 sm:p-8 space-y-6 max-h-[70vh] overflow-y-auto">
                               <div className="space-y-4">
                                 <div className="space-y-2">
                                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Contribution Amount (XAF)</Label>
@@ -388,7 +388,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 </div>
                               </div>
                             </div>
-                            <DialogFooter className="bg-accent/20 p-6 border-t border-accent">
+                            <DialogFooter className="bg-accent/20 p-5 sm:p-6 border-t border-accent">
                               <Button 
                                 className="w-full h-14 rounded-2xl shadow-xl font-black uppercase text-xs gap-3 bg-primary text-white hover:bg-primary/90" 
                                 onClick={handleSupportSubmit}
@@ -403,7 +403,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">
+                    <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 md:gap-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40 text-center md:text-right">
                       <span>Node Status: Optimal</span>
                       <span>•</span>
                       <span>Verified Institutional Registry</span>

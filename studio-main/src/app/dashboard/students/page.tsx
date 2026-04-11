@@ -251,12 +251,12 @@ export default function StudentsPage() {
   return (
     <div className="space-y-8 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-start sm:items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full hover:bg-white shadow-sm shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-primary font-headline flex items-center gap-3">
+            <h1 className="text-2xl md:text-3xl font-bold text-primary font-headline flex items-start sm:items-center gap-3">
               <div className="p-2 bg-primary rounded-xl shadow-lg">
                 <GraduationCap className="w-6 h-6 text-secondary" />
               </div>
@@ -268,7 +268,7 @@ export default function StudentsPage() {
           </div>
         </div>
 
-        <div className="flex gap-2 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           {isTeacher ? (
             <Button className="flex-1 md:flex-none h-12 rounded-2xl font-bold gap-2 bg-secondary text-primary hover:bg-secondary/90 shadow-lg" onClick={handleExportPDF}>
               <FileText className="w-4 h-4" /> Export Filtered (PDF)
@@ -354,9 +354,9 @@ export default function StudentsPage() {
             </div>
           </div>
 
-          <Card className="border-none shadow-xl overflow-hidden rounded-[2.5rem] bg-white">
+          <Card className="border-none shadow-xl overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white">
             <CardContent className="p-0 overflow-x-auto scrollbar-thin">
-              <Table>
+              <Table className="min-w-[640px]">
                 <TableHeader className="bg-accent/10 uppercase text-[9px] font-black tracking-widest border-b border-accent/20">
                   <TableRow>
                     <TableHead className="pl-8 py-4">Student Profile</TableHead>
@@ -429,8 +429,8 @@ export default function StudentsPage() {
         <TabsContent value="promotion" className="animate-in fade-in slide-in-from-bottom-2 mt-0 space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 space-y-6">
-              <Card className="border-none shadow-sm bg-white overflow-hidden rounded-[2.5rem]">
-                <CardHeader className="bg-primary p-8 text-white">
+              <Card className="border-none shadow-sm bg-white overflow-hidden rounded-[2rem] sm:rounded-[2.5rem]">
+                <CardHeader className="bg-primary p-5 sm:p-8 text-white">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
                       <div className="p-3 bg-white/10 rounded-2xl text-secondary">
@@ -452,7 +452,7 @@ export default function StudentsPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0 overflow-x-auto">
-                  <Table>
+                  <Table className="min-w-[640px]">
                     <TableHeader className="bg-accent/10 uppercase text-[9px] font-black tracking-widest">
                       <TableRow>
                         <TableHead className="pl-8 py-4">Student Profile</TableHead>
@@ -499,15 +499,15 @@ export default function StudentsPage() {
 
       {/* ADMISSION DIALOG */}
       <Dialog open={isAdmissionOpen} onOpenChange={setIsAdmissionOpen}>
-        <DialogContent className="sm:max-w-3xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
-          <DialogHeader className="bg-primary p-8 text-white relative shrink-0">
+        <DialogContent className="sm:max-w-3xl rounded-[2rem] sm:rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
+          <DialogHeader className="bg-primary p-5 sm:p-8 text-white relative shrink-0">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-white/10 rounded-xl"><UserPlus className="w-8 h-8 text-secondary" /></div>
               <DialogTitle className="text-2xl font-black uppercase">New Student Admission</DialogTitle>
             </div>
             <Button variant="ghost" size="icon" onClick={() => setIsAdmissionOpen(false)} className="absolute top-4 right-4 text-white hover:bg-white/10"><X className="w-6 h-6" /></Button>
           </DialogHeader>
-          <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto bg-white">
+          <div className="p-5 sm:p-8 space-y-8 max-h-[70vh] overflow-y-auto bg-white">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Identity Name</Label>
@@ -522,7 +522,7 @@ export default function StudentsPage() {
               </div>
             </div>
           </div>
-          <DialogFooter className="bg-accent/20 p-6 border-t border-accent">
+          <DialogFooter className="bg-accent/20 p-5 sm:p-6 border-t border-accent">
             <Button className="w-full h-14 rounded-2xl shadow-xl font-black uppercase text-[10px] gap-2 bg-primary text-white" onClick={handleFinalizeAdmission} disabled={isProcessing}>
               {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />} Finalize Admission
             </Button>
@@ -533,10 +533,10 @@ export default function StudentsPage() {
       {/* EDIT DIALOG */}
       <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
         <DialogContent className="sm:max-w-md rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
-          <DialogHeader className="bg-primary p-8 text-white">
+          <DialogHeader className="bg-primary p-5 sm:p-8 text-white">
             <DialogTitle>Edit Student Identity</DialogTitle>
           </DialogHeader>
-          <div className="p-8 space-y-4">
+          <div className="p-5 sm:p-8 space-y-4">
             <div className="space-y-2">
               <Label>Full Name</Label>
               <Input value={editingUser?.name} onChange={(e) => setEditingUser({...editingUser, name: e.target.value})} className="h-12 rounded-xl" />

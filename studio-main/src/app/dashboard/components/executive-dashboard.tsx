@@ -41,7 +41,7 @@ export function ExecutiveDashboard() {
     <div className="space-y-8 pb-20 animate-in fade-in duration-500">
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-primary font-headline flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary font-headline flex items-start sm:items-center gap-3">
             <div className="p-2 bg-primary rounded-xl shadow-lg">
               <Globe className="w-6 h-6 text-secondary" />
             </div>
@@ -50,11 +50,11 @@ export function ExecutiveDashboard() {
           <p className="text-muted-foreground">Strategic network analysis and institutional revenue metrics.</p>
         </div>
 
-        <div className="bg-white p-2 rounded-[1.5rem] shadow-sm border flex flex-wrap items-center gap-3 w-fit">
-          <div className="flex items-center gap-2 px-3 border-r">
+        <div className="bg-white p-2 rounded-[1.5rem] shadow-sm border flex w-full xl:w-auto flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 px-3 sm:border-r">
             <Calendar className="w-4 h-4 text-primary/40" />
             <Select value={timePeriod} onValueChange={(v: any) => setTimePeriod(v)}>
-              <SelectTrigger className="w-[120px] border-none shadow-none h-9 text-xs font-bold focus:ring-0">
+              <SelectTrigger className="w-full sm:w-[120px] border-none shadow-none h-10 text-xs font-bold focus:ring-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -67,7 +67,7 @@ export function ExecutiveDashboard() {
           <div className="flex items-center gap-2 px-3">
             <Building2 className="w-4 h-4 text-primary/40" />
             <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
-              <SelectTrigger className="w-[180px] border-none shadow-none h-9 text-xs font-bold focus:ring-0">
+              <SelectTrigger className="w-full sm:w-[180px] border-none shadow-none h-10 text-xs font-bold focus:ring-0">
                 <SelectValue placeholder="All Institutions" />
               </SelectTrigger>
               <SelectContent>
@@ -160,8 +160,8 @@ export function ExecutiveDashboard() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <Card className="lg:col-span-8 border-none shadow-xl overflow-hidden rounded-[2.5rem] bg-white">
-          <CardHeader className="border-b bg-accent/5 p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <Card className="lg:col-span-8 border-none shadow-xl overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white">
+          <CardHeader className="border-b bg-accent/5 p-5 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-lg font-black text-primary uppercase tracking-tight flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-secondary" />
@@ -173,7 +173,7 @@ export function ExecutiveDashboard() {
               <Zap className="w-3 h-3 mr-1.5" /> High Availability Node
             </Badge>
           </CardHeader>
-          <CardContent className="h-[400px] pt-10">
+          <CardContent className="h-[300px] sm:h-[400px] pt-6 sm:pt-10">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={activeChartData}>
                 <defs>
@@ -198,14 +198,14 @@ export function ExecutiveDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-4 border-none shadow-xl overflow-hidden rounded-[2.5rem] bg-white flex flex-col">
-          <CardHeader className="bg-primary p-8 text-white">
+        <Card className="lg:col-span-4 border-none shadow-xl overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white flex flex-col">
+          <CardHeader className="bg-primary p-5 sm:p-8 text-white">
             <CardTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
               <PieChart className="w-5 h-5 text-secondary" />
               User Segment Distribution
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 pt-10">
+          <CardContent className="flex-1 pt-6 sm:pt-10">
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={userDistribution} layout="vertical">
                 <XAxis type="number" hide />

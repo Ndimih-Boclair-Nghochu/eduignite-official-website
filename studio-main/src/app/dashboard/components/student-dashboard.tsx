@@ -53,14 +53,14 @@ export function StudentDashboard() {
   return (
     <div className="space-y-8 pb-20 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-start sm:items-center gap-4">
           <Avatar className="h-16 w-16 md:h-20 md:w-20 border-4 border-white shadow-xl shrink-0 ring-4 ring-primary/5">
             <AvatarImage src={user?.avatar} alt={user?.name} />
             <AvatarFallback className="bg-primary/5 text-primary text-2xl font-black">{user?.name?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-3xl font-bold text-primary font-headline tracking-tighter uppercase leading-none">Welcome, {user?.name}</h1>
-            <div className="flex items-center gap-2 mt-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary font-headline tracking-tighter uppercase leading-tight">Welcome, {user?.name}</h1>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge className="bg-primary/5 text-primary border-primary/10 h-5 px-3 font-black uppercase text-[10px] tracking-widest">
                 {(user as any)?.class}
               </Badge>
@@ -68,7 +68,7 @@ export function StudentDashboard() {
             </div>
           </div>
         </div>
-        <div className="bg-green-50 px-4 py-2 rounded-xl border border-green-100 flex items-center gap-3 shrink-0 shadow-sm">
+        <div className="bg-green-50 px-4 py-2 rounded-xl border border-green-100 flex items-center gap-3 shadow-sm w-full sm:w-fit">
           <ShieldCheck className="w-5 h-5 text-green-600" />
           <p className="text-xs font-bold text-green-700">Student Node Active</p>
         </div>
@@ -96,8 +96,8 @@ export function StudentDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <Card className="lg:col-span-8 border-none shadow-xl overflow-hidden rounded-[2.5rem] bg-white">
-          <CardHeader className="bg-primary/5 p-8 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <Card className="lg:col-span-8 border-none shadow-xl overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white">
+          <CardHeader className="bg-primary/5 p-5 sm:p-8 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-xl font-black text-primary uppercase tracking-tighter flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-secondary"/> Performance Velocity
@@ -106,7 +106,7 @@ export function StudentDashboard() {
             </div>
             <Badge variant="outline" className="border-primary/10 text-primary font-bold uppercase text-[9px] px-3">VERIFIED RECORDS</Badge>
           </CardHeader>
-          <CardContent className="h-[350px] pt-10">
+          <CardContent className="h-[300px] sm:h-[350px] pt-6 sm:pt-10">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={DATA_PERIODS.monthly}>
                 <defs>
@@ -125,15 +125,15 @@ export function StudentDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-4 border-none shadow-xl overflow-hidden rounded-[2.5rem] bg-primary text-white flex flex-col">
-          <CardHeader className="p-8">
+        <Card className="lg:col-span-4 border-none shadow-xl overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-primary text-white flex flex-col">
+          <CardHeader className="p-5 sm:p-8">
             <CardTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-secondary" />
               Subject Proficiency
             </CardTitle>
             <CardDescription className="text-white/60">Latest evaluation benchmarks.</CardDescription>
           </CardHeader>
-          <CardContent className="flex-1 pt-10">
+          <CardContent className="flex-1 pt-6 sm:pt-10">
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={subjectPerf}>
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 'bold', fill: '#fff' }} />
@@ -156,7 +156,7 @@ export function StudentDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <Card className="lg:col-span-7 border-none shadow-xl overflow-hidden rounded-[2rem] bg-white">
-          <CardHeader className="bg-white border-b p-8 flex items-center justify-between">
+          <CardHeader className="bg-white border-b p-5 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <CardTitle className="text-lg font-black text-primary uppercase flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-secondary" />
@@ -195,8 +195,8 @@ export function StudentDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-5 border-none shadow-xl overflow-hidden rounded-[2.5rem] bg-white">
-          <CardHeader className="bg-white border-b p-8 flex items-center justify-between">
+        <Card className="lg:col-span-5 border-none shadow-xl overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white">
+          <CardHeader className="bg-white border-b p-5 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <CardTitle className="text-lg font-black text-primary uppercase flex items-center gap-2">
                 <Zap className="w-5 h-5 text-secondary" />

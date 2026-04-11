@@ -285,7 +285,7 @@ export function DashboardSidebar({ onClose }: SidebarProps) {
 
   return (
     <div className="flex flex-col h-full bg-primary text-white w-full border-r border-white/10 overflow-hidden">
-      <div className="p-6 shrink-0">
+      <div className="p-4 sm:p-6 shrink-0">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 overflow-hidden">
             {!isSuperAdmin && user?.school?.logo ? (
@@ -297,7 +297,7 @@ export function DashboardSidebar({ onClose }: SidebarProps) {
                 <Building2 className="w-6 h-6 text-primary" />
               </div>
             )}
-            <span className="text-lg font-bold tracking-tight font-headline truncate uppercase">
+            <span className="min-w-0 text-base sm:text-lg font-bold tracking-tight font-headline truncate uppercase">
               {isSuperAdmin ? "Platform Board" : (user?.school?.shortName || user?.school?.name || "Institution")}
             </span>
           </div>
@@ -326,7 +326,7 @@ export function DashboardSidebar({ onClose }: SidebarProps) {
         </div>
       </div>
 
-      <div className="flex-1 px-3 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
+      <div className="flex-1 px-2 sm:px-3 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
         <div className="space-y-1 py-2">
           {filteredRoutes.map((route) => (
             <Link
@@ -334,19 +334,19 @@ export function DashboardSidebar({ onClose }: SidebarProps) {
               href={route.href}
               onClick={() => onClose?.()}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 hover:bg-white/10 group",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 hover:bg-white/10 group min-w-0",
                 pathname === route.href ? "bg-white/20 text-white" : "text-white/60"
               )}
             >
               <route.icon className={cn("w-5 h-5", pathname === route.href ? "text-secondary" : "text-white/60 group-hover:text-white")} />
-              <span className="font-medium text-sm">{route.label}</span>
+              <span className="min-w-0 break-words font-medium text-sm leading-snug">{route.label}</span>
             </Link>
           ))}
         </div>
       </div>
 
       <div className="p-4 border-t border-white/10 mt-auto bg-primary shrink-0">
-        <Link href="/dashboard/profile" onClick={() => onClose?.()} className="flex items-center gap-3 mb-4 px-2 hover:bg-white/5 py-2 rounded-lg transition-colors group">
+        <Link href="/dashboard/profile" onClick={() => onClose?.()} className="flex items-center gap-3 mb-4 px-2 hover:bg-white/5 py-2 rounded-lg transition-colors group min-w-0">
           <div className="w-10 h-10 rounded-full bg-secondary overflow-hidden shrink-0 border-2 border-transparent group-hover:border-white/20">
             <img src={user?.avatar} alt={user?.name} className="w-full h-full object-cover" />
           </div>

@@ -33,7 +33,7 @@ export function AdminDashboard() {
   return (
     <div className="space-y-8 pb-20 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-start sm:items-center gap-4">
           <div className="w-16 h-16 bg-primary rounded-[1.5rem] shadow-xl border-4 border-white flex items-center justify-center p-3">
             {user?.school?.logo ? (
               <img src={user.school.logo} alt="School" className="w-full h-full object-contain" />
@@ -42,18 +42,18 @@ export function AdminDashboard() {
             )}
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-primary font-headline tracking-tighter uppercase leading-none">{user?.school?.name || "Institution Dashboard"}</h1>
-            <div className="flex items-center gap-2 mt-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary font-headline tracking-tighter uppercase leading-tight">{user?.school?.name || "Institution Dashboard"}</h1>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge className="bg-secondary text-primary border-none font-black h-5 px-3 text-[9px] tracking-widest uppercase">Admin Node</Badge>
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">• Principal: {user?.school?.principal}</span>
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="h-11 px-6 rounded-xl font-bold border-primary/10 bg-white gap-2 shadow-sm">
+        <div className="flex w-full md:w-auto flex-col sm:flex-row gap-2">
+          <Button variant="outline" className="h-11 px-6 rounded-xl font-bold border-primary/10 bg-white gap-2 shadow-sm w-full sm:w-auto">
             <FileDown className="w-4 h-4 text-primary" /> Reports
           </Button>
-          <Button className="h-11 px-8 shadow-xl font-black uppercase tracking-widest text-[10px] gap-2 rounded-xl">
+          <Button className="h-11 px-8 shadow-xl font-black uppercase tracking-widest text-[10px] gap-2 rounded-xl w-full sm:w-auto">
             <ShieldCheck className="w-4 h-4" /> Verify Node
           </Button>
         </div>
@@ -85,8 +85,8 @@ export function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <Card className="lg:col-span-8 border-none shadow-xl overflow-hidden rounded-[2.5rem] bg-white">
-          <CardHeader className="bg-primary/5 p-8 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <Card className="lg:col-span-8 border-none shadow-xl overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white">
+          <CardHeader className="bg-primary/5 p-5 sm:p-8 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-xl font-black text-primary uppercase tracking-tighter flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-secondary"/> Pedagogical Velocity
@@ -94,7 +94,7 @@ export function AdminDashboard() {
               <CardDescription>Aggregate performance trends across all class streams.</CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="h-[350px] pt-10">
+          <CardContent className="h-[300px] sm:h-[350px] pt-6 sm:pt-10">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={DATA_PERIODS.monthly}>
                 <defs>
@@ -113,8 +113,8 @@ export function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-4 border-none shadow-xl overflow-hidden rounded-[2.5rem] bg-white flex flex-col">
-          <CardHeader className="bg-primary p-8 text-white">
+        <Card className="lg:col-span-4 border-none shadow-xl overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white flex flex-col">
+          <CardHeader className="bg-primary p-5 sm:p-8 text-white">
             <CardTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-secondary" />
               Governance Log
@@ -140,8 +140,8 @@ export function AdminDashboard() {
         </Card>
       </div>
 
-      <Card className="border-none shadow-xl overflow-hidden rounded-[2.5rem] bg-white">
-        <CardHeader className="bg-white border-b p-8">
+      <Card className="border-none shadow-xl overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white">
+        <CardHeader className="bg-white border-b p-5 sm:p-8">
           <CardTitle className="text-xl font-black text-primary uppercase tracking-tighter flex items-center gap-2">
             <GraduationCap className="w-5 h-5 text-secondary" />
             Academic Stream Summary
