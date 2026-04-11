@@ -1,0 +1,17 @@
+{
+  "name": "eduignite-root",
+  "private": true,
+  "workspaces": [
+    "studio-main"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace studio-main",
+    "dev": "npm run dev --workspace studio-main",
+    "start": "npm run start --workspace studio-main",
+    "lint": "npm run lint --workspace studio-main",
+    "typecheck": "npm run typecheck --workspace studio-main"
+  },
+  "dependencies": {
+    "next": "15.5.9"
+  }
+}
