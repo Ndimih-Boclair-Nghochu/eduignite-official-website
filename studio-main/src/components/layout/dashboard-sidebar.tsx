@@ -103,7 +103,7 @@ export function DashboardSidebar({ onClose }: SidebarProps) {
       label: language === 'en' ? 'Testimonials' : 'Témoignages',
       icon: Quote,
       href: "/dashboard/testimonials",
-      roles: ["SUPER_ADMIN", "CEO"], 
+      roles: ["SUPER_ADMIN", "CEO", "CTO"], 
     },
     {
       label: language === 'en' ? 'Portfolio & Policy' : 'Portfolio & Politique',

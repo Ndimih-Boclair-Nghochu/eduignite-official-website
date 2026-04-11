@@ -174,7 +174,7 @@ export default function AnnouncementsPage() {
     if (ann.target === "all_schools") return true;
     if (ann.target === "saas_admins") return isPlatformExecutive;
     if (ann.target === "board_directors") return ["CEO", "CTO", "COO", "SUPER_ADMIN", "DESIGNER"].includes(userRole);
-    if (ann.target === "investors") return ["CEO", "INV", "SUPER_ADMIN"].includes(userRole);
+    if (ann.target === "investors") return ["CEO", "CTO", "INV", "SUPER_ADMIN"].includes(userRole);
 
     // My own messages
     if (ann.senderUid === userUid) return true;

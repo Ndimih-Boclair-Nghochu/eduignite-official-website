@@ -220,7 +220,7 @@ export default function FoundersManagementPage() {
             Executive Relationship Map
           </CardTitle>
           <CardDescription>
-            Everyone below is visible to the CEO account, while the CTO remains visible as the other protected founder.
+                    Everyone below is visible to both founder accounts, with the CEO and CTO always shown together as protected co-founders.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
@@ -267,8 +267,9 @@ export default function FoundersManagementPage() {
         </CardHeader>
         <CardContent className="grid gap-4 p-8 md:grid-cols-3">
           {[
-            "CEO can see the CTO as the other founder and can view all platform-wide stats.",
-            "CTO can see the CEO as the other founder and can view the same founder-level platform scope.",
+                    "CEO can see the CTO as the other founder and can view all platform-wide stats.",
+                    "CTO can see the CEO as the other founder and can view the same founder-level platform scope.",
+                    "Both founders share the same dashboard tab access across the platform executive workspace.",
             "Founder accounts are protected from deletion, suspension, role downgrade, and superuser removal.",
           ].map((rule) => (
             <div key={rule} className="rounded-2xl border border-accent bg-accent/20 p-5">

@@ -420,7 +420,7 @@ export default function SchoolsManagementPage() {
                   ) : (
                     <div className="p-4 bg-white rounded-xl border border-primary/10 flex items-center gap-3">
                       <Lock className="w-4 h-4 text-primary/40" />
-                      <p className="text-[10px] font-black uppercase text-muted-foreground">Action restricted to the CEO office.</p>
+                      <p className="text-[10px] font-black uppercase text-muted-foreground">Action restricted to the founder office.</p>
                     </div>
                   )}
                </div>
@@ -522,7 +522,7 @@ export default function SchoolsManagementPage() {
                <div className="pt-8 border-t-2 border-black/5 flex justify-between items-end">
                   <div className="space-y-1">
                     <p className="text-[8px] font-black uppercase text-muted-foreground tracking-[0.2em]">Verified by</p>
-                    <p className="font-black text-sm uppercase tracking-tighter">The Office of the CEO</p>
+                    <p className="font-black text-sm uppercase tracking-tighter">The Office of the Founders</p>
                     <img src={platformSettings.logo} alt="EduIgnite" className="w-6 h-6 grayscale opacity-20" />
                   </div>
                   <div className="text-center space-y-4 w-40">
