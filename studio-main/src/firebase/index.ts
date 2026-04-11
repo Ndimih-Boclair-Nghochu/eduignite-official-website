@@ -14,23 +14,17 @@ import {
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
   if (!getApps().length) {
-    let firebaseApp;
-    try {
-      // Prefer the explicit config object on Vercel/Railway style deploys where
-      // Firebase App Hosting auto-initialization is not available.
-      const hasExplicitConfig = Boolean(
-        firebaseConfig?.apiKey &&
-        firebaseConfig?.projectId &&
-        firebaseConfig?.appId
-      );
+    const hasExplicitConfig = Boolean(
+      firebaseConfig?.apiKey &&
+      firebaseConfig?.projectId &&
+      firebaseConfig?.appId
+    );
 
-      firebaseApp = hasExplicitConfig
-        ? initializeApp(firebaseConfig)
-        : initializeApp();
-    } catch (e) {
-      console.warn('Firebase initialization fallback applied.', e);
-      firebaseApp = initializeApp(firebaseConfig);
+    if (!hasExplicitConfig) {
+      throw new Error('Firebase configuration is incomplete. Provide NEXT_PUBLIC_FIREBASE_* values before initializing Firebase.');
     }
+
+    const firebaseApp = initializeApp(firebaseConfig);
 
     const auth = getAuth(firebaseApp);
 
