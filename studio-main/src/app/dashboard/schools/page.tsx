@@ -4,7 +4,6 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,14 +52,34 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { schoolsService } from "@/lib/api/services/schools.service";
+
+const REGION_OPTIONS = [
+  "Littoral",
+  "Centre",
+  "East",
+  "North",
+  "South",
+  "West",
+  "Northwest",
+  "Southwest",
+  "South-West",
+  "North-West",
+];
+
+const normalizeSchoolList = (payload: any) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.results)) return payload.results;
+  return [];
+};
 
 // API Hooks
 const useSchools = () => {
   return useQuery({
     queryKey: ["schools"],
     queryFn: async () => {
-      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/schools`);
-      return data;
+      return normalizeSchoolList(await schoolsService.getSchools());
     },
     initialData: [],
   });
@@ -70,8 +89,7 @@ const useSchoolStats = () => {
   return useQuery({
     queryKey: ["school-stats"],
     queryFn: async () => {
-      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/schools/stats`);
-      return data;
+      return schoolsService.getSchoolStats();
     },
     initialData: {},
   });
@@ -80,12 +98,10 @@ const useSchoolStats = () => {
 const useCreateSchool = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (school: any) => {
-      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/schools`, school);
-      return data;
-    },
+    mutationFn: async (school: any) => schoolsService.createSchool(school),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schools"] });
+      queryClient.invalidateQueries({ queryKey: ["school-stats"] });
     },
   });
 };
@@ -93,10 +109,7 @@ const useCreateSchool = () => {
 const useUpdateSchool = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...school }: any) => {
-      const { data } = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/schools/${id}`, school);
-      return data;
-    },
+    mutationFn: async ({ id, ...school }: any) => schoolsService.updateSchool(id, school),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schools"] });
     },
@@ -106,12 +119,13 @@ const useUpdateSchool = () => {
 const useToggleSchoolStatus = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { data } = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/schools/${id}/toggle-status`);
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { data } = await schoolsService.toggleSchoolStatus(id, { status });
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schools"] });
+      queryClient.invalidateQueries({ queryKey: ["school-stats"] });
     },
   });
 };
@@ -126,11 +140,11 @@ export default function SchoolsManagementPage() {
   const toggleSchoolStatusMutation = useToggleSchoolStatus();
   const deleteSchoolMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { data } = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/schools/${id}`);
-      return data;
+      await schoolsService.deleteSchool(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schools"] });
+      queryClient.invalidateQueries({ queryKey: ["school-stats"] });
     },
   });
   
@@ -145,8 +159,15 @@ export default function SchoolsManagementPage() {
     shortName: "",
     principal: "",
     email: "",
+    phone: "",
     motto: "Discipline - Work - Success",
     description: "New Institutional Node",
+    location: "",
+    region: "Littoral",
+    division: "",
+    subDivision: "",
+    cityVillage: "",
+    address: "",
     logo: "https://picsum.photos/seed/newschool/200/200",
     banner: "https://picsum.photos/seed/school-banner/1200/400"
   });
@@ -162,15 +183,50 @@ export default function SchoolsManagementPage() {
     s.id?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const getNextStatus = (currentStatus?: string) => {
+    if (currentStatus === "Active") return "Suspended";
+    return "Active";
+  };
+
   const handleSaveSchool = async () => {
-    if (!newSchoolData.name || !newSchoolData.principal || !newSchoolData.shortName || !newSchoolData.email) {
+    if (
+      !newSchoolData.name ||
+      !newSchoolData.principal ||
+      !newSchoolData.shortName ||
+      !newSchoolData.email ||
+      !newSchoolData.phone ||
+      !newSchoolData.location ||
+      !newSchoolData.region ||
+      !newSchoolData.division ||
+      !newSchoolData.subDivision ||
+      !newSchoolData.cityVillage ||
+      !newSchoolData.address
+    ) {
       toast({ variant: "destructive", title: "Missing Information", description: "Please complete all required fields." });
       return;
     }
 
     setIsProcessing(true);
     try {
-      const created = await createSchoolMutation.mutateAsync(newSchoolData);
+      const created = await createSchoolMutation.mutateAsync({
+        id: newSchoolData.shortName.trim().toUpperCase(),
+        name: newSchoolData.name.trim(),
+        short_name: newSchoolData.shortName.trim().toUpperCase(),
+        principal: newSchoolData.principal.trim(),
+        email: newSchoolData.email.trim(),
+        phone: newSchoolData.phone.trim(),
+        motto: newSchoolData.motto.trim(),
+        description: newSchoolData.description.trim(),
+        location: newSchoolData.location.trim(),
+        region: newSchoolData.region,
+        division: newSchoolData.division.trim(),
+        sub_division: newSchoolData.subDivision.trim(),
+        city_village: newSchoolData.cityVillage.trim(),
+        address: newSchoolData.address.trim(),
+        logo: newSchoolData.logo,
+        banner: newSchoolData.banner,
+        status: "Pending",
+      });
       setIsProcessing(false);
       setIsAddModalOpen(false);
       setOnboardingSuccess(created);
@@ -179,15 +235,26 @@ export default function SchoolsManagementPage() {
         shortName: "",
         principal: "",
         email: "",
+        phone: "",
         motto: "Discipline - Work - Success",
         description: "New Institutional Node",
+        location: "",
+        region: "Littoral",
+        division: "",
+        subDivision: "",
+        cityVillage: "",
+        address: "",
         logo: "https://picsum.photos/seed/newschool/200/200",
         banner: "https://picsum.photos/seed/school-banner/1200/400"
       });
       toast({ title: "Node Provisioned", description: "Institution successfully onboarded to the network." });
-    } catch (error) {
+    } catch (error: any) {
       setIsProcessing(false);
-      toast({ variant: "destructive", title: "Error", description: "Failed to create school" });
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error?.response?.data?.detail || "Failed to create school",
+      });
     }
   };
 
@@ -269,6 +336,79 @@ export default function SchoolsManagementPage() {
                     />
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Official Phone Number</Label>
+                  <Input
+                    value={newSchoolData.phone}
+                    onChange={(e) => setNewSchoolData({...newSchoolData, phone: e.target.value})}
+                    className="h-12 bg-accent/30 border-none rounded-xl font-bold"
+                    placeholder="+237670123456"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Location</Label>
+                    <Input
+                      value={newSchoolData.location}
+                      onChange={(e) => setNewSchoolData({...newSchoolData, location: e.target.value})}
+                      className="h-12 bg-accent/30 border-none rounded-xl font-bold"
+                      placeholder="Douala"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Region</Label>
+                    <Select value={newSchoolData.region} onValueChange={(value) => setNewSchoolData({ ...newSchoolData, region: value })}>
+                      <SelectTrigger className="h-12 bg-accent/30 border-none rounded-xl font-bold">
+                        <SelectValue placeholder="Select Region" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REGION_OPTIONS.map((region) => (
+                          <SelectItem key={region} value={region}>{region}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Division</Label>
+                    <Input
+                      value={newSchoolData.division}
+                      onChange={(e) => setNewSchoolData({...newSchoolData, division: e.target.value})}
+                      className="h-12 bg-accent/30 border-none rounded-xl font-bold"
+                      placeholder="Wouri"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Sub-Division</Label>
+                    <Input
+                      value={newSchoolData.subDivision}
+                      onChange={(e) => setNewSchoolData({...newSchoolData, subDivision: e.target.value})}
+                      className="h-12 bg-accent/30 border-none rounded-xl font-bold"
+                      placeholder="Douala I"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">City / Village</Label>
+                    <Input
+                      value={newSchoolData.cityVillage}
+                      onChange={(e) => setNewSchoolData({...newSchoolData, cityVillage: e.target.value})}
+                      className="h-12 bg-accent/30 border-none rounded-xl font-bold"
+                      placeholder="Bonanjo"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Address</Label>
+                    <Input
+                      value={newSchoolData.address}
+                      onChange={(e) => setNewSchoolData({...newSchoolData, address: e.target.value})}
+                      className="h-12 bg-accent/30 border-none rounded-xl font-bold"
+                      placeholder="123 Education Avenue"
+                    />
+                  </div>
+                </div>
               </div>
               <DialogFooter className="bg-accent/20 p-6 border-t border-accent">
                 <Button onClick={handleSaveSchool} className="w-full h-14 rounded-2xl shadow-lg font-black uppercase tracking-widest text-xs gap-3 bg-primary text-white hover:bg-primary/90" disabled={isProcessing}>
@@ -313,7 +453,7 @@ export default function SchoolsManagementPage() {
                    </DropdownMenuItem>
                   {isFounderOwner && (
                      <>
-                       <DropdownMenuItem className="gap-3 rounded-xl cursor-pointer" onClick={() => toggleSchoolStatusMutation.mutateAsync(school.id)}>
+                       <DropdownMenuItem className="gap-3 rounded-xl cursor-pointer" onClick={() => toggleSchoolStatusMutation.mutateAsync({ id: school.id, status: getNextStatus(school.status) })}>
                          {school.status === 'Active' ? <Ban className="w-4 h-4 text-red-500" /> : <CheckCircle2 className="w-4 h-4 text-green-500" />}
                          <span className="font-bold text-xs">{school.status === 'Active' ? 'Suspend Node' : 'Activate Node'}</span>
                        </DropdownMenuItem>
@@ -410,7 +550,7 @@ export default function SchoolsManagementPage() {
                <div className="grid grid-cols-1 gap-4">
                  {isFounderOwner ? (
                     <>
-                      <Button variant="outline" className="w-full justify-between h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-white border-primary/10 hover:bg-primary/5 transition-all" onClick={() => { toggleSchoolStatusMutation.mutate(managedSchool.id); setManagedSchool(null); }}>
+                      <Button variant="outline" className="w-full justify-between h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-white border-primary/10 hover:bg-primary/5 transition-all" onClick={() => { toggleSchoolStatusMutation.mutate({ id: managedSchool.id, status: getNextStatus(managedSchool?.status) }); setManagedSchool(null); }}>
                         License Authorization {managedSchool?.status === 'Active' ? <Ban className="w-5 h-5 text-red-500" /> : <CheckCircle2 className="w-5 h-5 text-green-500" />}
                       </Button>
                       <Button variant="destructive" className="w-full justify-between h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg opacity-80 hover:opacity-100 transition-all" onClick={() => { deleteSchoolMutation.mutate(managedSchool.id); setManagedSchool(null); }}>

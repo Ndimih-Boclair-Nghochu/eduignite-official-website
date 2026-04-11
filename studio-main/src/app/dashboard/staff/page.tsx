@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +30,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
@@ -43,14 +43,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { usersService } from "@/lib/api/services/users.service";
+import { schoolsService } from "@/lib/api/services/schools.service";
+
+const STAFF_CREATION_ROLES = ["SCHOOL_ADMIN", "SUB_ADMIN", "TEACHER", "BURSAR", "LIBRARIAN"];
+
+const normalizeResults = (payload: any) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.results)) return payload.results;
+  return [];
+};
 
 // API Hooks
 const useUsers = (params: any) => {
   return useQuery({
     queryKey: ["users", params],
     queryFn: async () => {
-      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`, { params });
-      return data;
+      return normalizeResults(await usersService.getUsers(params));
     },
     initialData: [],
   });
@@ -60,8 +70,8 @@ const useStaffRemarks = (params: any) => {
   return useQuery({
     queryKey: ["remarks", params],
     queryFn: async () => {
-      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/remarks`, { params });
-      return data;
+      const { staffRemarksService } = await import("@/lib/api/services/staff-remarks.service");
+      return normalizeResults(await staffRemarksService.getRemarks(params));
     },
     initialData: [],
   });
@@ -71,8 +81,8 @@ const useMyRemarks = () => {
   return useQuery({
     queryKey: ["my-remarks"],
     queryFn: async () => {
-      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/remarks/me`);
-      return data;
+      const { staffRemarksService } = await import("@/lib/api/services/staff-remarks.service");
+      return normalizeResults(await staffRemarksService.getMyRemarks());
     },
     initialData: [],
   });
@@ -82,8 +92,12 @@ const useCreateRemark = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (remark: any) => {
-      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/remarks`, remark);
-      return data;
+      const { staffRemarksService } = await import("@/lib/api/services/staff-remarks.service");
+      return staffRemarksService.createRemark({
+        staff: remark.staffId,
+        text: remark.message,
+        remark_type: remark.type,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["remarks"] });
@@ -95,12 +109,30 @@ const useAcknowledgeRemark = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (remarkId: string) => {
-      const { data } = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/remarks/${remarkId}/acknowledge`);
-      return data;
+      const { staffRemarksService } = await import("@/lib/api/services/staff-remarks.service");
+      return staffRemarksService.acknowledgeRemark(remarkId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["remarks"] });
       queryClient.invalidateQueries({ queryKey: ["my-remarks"] });
+    },
+  });
+};
+
+const useSchools = () => {
+  return useQuery({
+    queryKey: ["staff-school-options"],
+    queryFn: async () => normalizeResults(await schoolsService.getSchools()),
+    initialData: [],
+  });
+};
+
+const useCreateUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: any) => usersService.createUser(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };
@@ -119,7 +151,9 @@ export default function StaffPage() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isRemarkDialogOpen, setIsRemarkDialogOpen] = useState(false);
+  const [isCreateStaffDialogOpen, setIsCreateStaffDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [createdStaff, setCreatedStaff] = useState<any>(null);
 
   const [newRemark, setNewRemark] = useState({
     staffId: "",
@@ -127,12 +161,25 @@ export default function StaffPage() {
     message: "",
   });
 
+  const [newStaff, setNewStaff] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    whatsapp: "",
+    role: "SCHOOL_ADMIN",
+    school: "",
+    password: "",
+    passwordConfirm: "",
+  });
+
   const isAdmin = ["SCHOOL_ADMIN", "SUB_ADMIN"].includes(user?.role || "");
+  const isExecutive = ["SUPER_ADMIN", "CEO", "CTO", "COO"].includes(user?.role || "");
 
   // Fetch staff list
   const { data: staffList = [] } = useUsers({
     role: "TEACHER,BURSAR,LIBRARIAN,SUB_ADMIN",
   });
+  const { data: schoolOptions = [] } = useSchools();
 
   // Fetch remarks
   const { data: remarksList = [] } = useStaffRemarks({
@@ -143,6 +190,7 @@ export default function StaffPage() {
 
   const createRemarkMutation = useCreateRemark();
   const acknowledgeRemarkMutation = useAcknowledgeRemark();
+  const createUserMutation = useCreateUser();
 
   const filteredStaff = staffList.filter((s: any) =>
     s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -181,6 +229,67 @@ export default function StaffPage() {
     }
   };
 
+  const handleCreateStaff = async () => {
+    if (
+      !newStaff.name ||
+      !newStaff.email ||
+      !newStaff.role ||
+      !newStaff.password ||
+      !newStaff.passwordConfirm ||
+      !newStaff.school
+    ) {
+      toast({
+        variant: "destructive",
+        title: "Missing Information",
+        description: "Please complete all required staff fields.",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const created = await createUserMutation.mutateAsync({
+        name: newStaff.name.trim(),
+        email: newStaff.email.trim(),
+        phone: newStaff.phone.trim() || undefined,
+        whatsapp: newStaff.whatsapp.trim() || undefined,
+        role: newStaff.role,
+        school: newStaff.school,
+        password: newStaff.password,
+        password_confirm: newStaff.passwordConfirm,
+      });
+
+      setCreatedStaff(created);
+      setIsCreateStaffDialogOpen(false);
+      setNewStaff({
+        name: "",
+        email: "",
+        phone: "",
+        whatsapp: "",
+        role: "SCHOOL_ADMIN",
+        school: "",
+        password: "",
+        passwordConfirm: "",
+      });
+      toast({
+        title: "Staff Created",
+        description: "The account is ready. Share the matricule with the staff member.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Staff Creation Failed",
+        description:
+          error?.response?.data?.detail ||
+          error?.response?.data?.password_confirm?.[0] ||
+          error?.response?.data?.password?.[0] ||
+          "Unable to create the staff account.",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="space-y-8 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -193,6 +302,11 @@ export default function StaffPage() {
           </h1>
           <p className="text-muted-foreground mt-1">Manage faculty, remarks, and institutional staff.</p>
         </div>
+        {isExecutive && (
+          <Button className="gap-2 shadow-xl h-14 px-8 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-xs" onClick={() => setIsCreateStaffDialogOpen(true)}>
+            <Plus className="w-5 h-5" /> Create Staff Account
+          </Button>
+        )}
       </div>
 
       <Tabs defaultValue="list" className="w-full">
@@ -314,6 +428,106 @@ export default function StaffPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={isCreateStaffDialogOpen} onOpenChange={setIsCreateStaffDialogOpen}>
+        <DialogContent className="sm:max-w-xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
+          <DialogHeader className="bg-primary p-8 text-white">
+            <DialogTitle className="text-2xl font-black uppercase tracking-tighter">Create Staff Account</DialogTitle>
+            <DialogDescription className="text-white/70">
+              Provision a school-level account and generate a matricule for activation.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Full Name</Label>
+                <Input value={newStaff.name} onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })} className="h-12 bg-accent/30 border-none rounded-xl font-bold" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Email</Label>
+                <Input value={newStaff.email} onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })} className="h-12 bg-accent/30 border-none rounded-xl font-bold" type="email" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Phone</Label>
+                <Input value={newStaff.phone} onChange={(e) => setNewStaff({ ...newStaff, phone: e.target.value })} className="h-12 bg-accent/30 border-none rounded-xl font-bold" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">WhatsApp</Label>
+                <Input value={newStaff.whatsapp} onChange={(e) => setNewStaff({ ...newStaff, whatsapp: e.target.value })} className="h-12 bg-accent/30 border-none rounded-xl font-bold" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Role</Label>
+                <Select value={newStaff.role} onValueChange={(value) => setNewStaff({ ...newStaff, role: value })}>
+                  <SelectTrigger className="h-12 bg-accent/30 border-none rounded-xl font-bold">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STAFF_CREATION_ROLES.map((role) => (
+                      <SelectItem key={role} value={role}>{role.replace(/_/g, " ")}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">School</Label>
+                <Select value={newStaff.school} onValueChange={(value) => setNewStaff({ ...newStaff, school: value })}>
+                  <SelectTrigger className="h-12 bg-accent/30 border-none rounded-xl font-bold">
+                    <SelectValue placeholder="Select school" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {schoolOptions.map((school: any) => (
+                      <SelectItem key={school.id} value={school.id}>{school.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Temporary Password</Label>
+                <Input value={newStaff.password} onChange={(e) => setNewStaff({ ...newStaff, password: e.target.value })} className="h-12 bg-accent/30 border-none rounded-xl font-bold" type="password" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Confirm Password</Label>
+                <Input value={newStaff.passwordConfirm} onChange={(e) => setNewStaff({ ...newStaff, passwordConfirm: e.target.value })} className="h-12 bg-accent/30 border-none rounded-xl font-bold" type="password" />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="bg-accent/20 p-6 border-t border-accent">
+            <Button onClick={handleCreateStaff} className="w-full h-14 rounded-2xl shadow-lg font-black uppercase tracking-widest text-xs gap-3 bg-primary text-white hover:bg-primary/90" disabled={isProcessing}>
+              {isProcessing ? <><Loader2 className="w-5 h-5 animate-spin" /><span>Creating...</span></> : <><ShieldCheck className="w-5 h-5 text-secondary" /><span>Create Staff & Generate Matricule</span></>}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!createdStaff} onOpenChange={() => setCreatedStaff(null)}>
+        <DialogContent className="sm:max-w-lg rounded-[2.5rem] p-8 border-none shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-primary">Staff Account Ready</DialogTitle>
+            <DialogDescription>
+              Share this matricule with the staff member so they can activate the account.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-primary/10 bg-accent/20 p-5">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Generated Matricule</p>
+              <p className="mt-2 text-3xl font-black tracking-tight text-primary">{createdStaff?.matricule}</p>
+            </div>
+            <div className="rounded-2xl border border-primary/10 bg-white p-5 space-y-2">
+              <p className="text-sm font-bold text-primary">{createdStaff?.name}</p>
+              <p className="text-xs text-muted-foreground">{createdStaff?.email}</p>
+              <Badge variant="outline" className="text-[10px] border-primary/10 text-primary font-bold uppercase">
+                {createdStaff?.role?.replace('_', ' ')}
+              </Badge>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
