@@ -8,6 +8,14 @@ from .models import StaffRemark
 from .serializers import StaffRemarkSerializer, StaffRemarkCreateSerializer
 
 
+def is_platform_executive(user):
+    return bool(getattr(user, 'is_authenticated', False) and getattr(user, 'is_platform_executive', False))
+
+
+def is_school_admin(user):
+    return bool(getattr(user, 'is_authenticated', False) and getattr(user, 'is_school_admin', False))
+
+
 class StaffRemarkViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, OrderingFilter]
@@ -22,16 +30,16 @@ class StaffRemarkViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'executive':
+        if is_platform_executive(user):
             return StaffRemark.objects.all()
-        elif user.role in ['school_admin', 'sub_admin']:
+        elif is_school_admin(user):
             return StaffRemark.objects.filter(school=user.school)
         else:
             return StaffRemark.objects.filter(staff=user, is_confidential=False)
 
     def check_permissions(self, request):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            if request.user.role not in ['school_admin', 'sub_admin', 'executive']:
+            if not (is_school_admin(request.user) or is_platform_executive(request.user)):
                 self.permission_denied(request)
         return super().check_permissions(request)
 
@@ -64,7 +72,7 @@ class StaffRemarkViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def download_report(self, request):
         """Download remark history for a staff member (school_admin only)"""
-        if request.user.role not in ['school_admin', 'sub_admin', 'executive']:
+        if not (is_school_admin(request.user) or is_platform_executive(request.user)):
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
         from apps.users.models import User

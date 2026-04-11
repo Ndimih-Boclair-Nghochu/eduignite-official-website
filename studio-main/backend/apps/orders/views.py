@@ -15,7 +15,7 @@ class IsExecutiveOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return request.user and request.user.is_authenticated
-        return request.user and request.user.is_authenticated and request.user.role == 'executive'
+        return request.user and request.user.is_authenticated and request.user.is_platform_executive
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -36,7 +36,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user and user.role == 'executive':
+        if user and user.is_authenticated and user.is_platform_executive:
             return Order.objects.all()
         return Order.objects.none()
 
@@ -51,17 +51,17 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def check_permissions(self, request):
         if self.action in ['list', 'retrieve']:
-            if not (request.user and request.user.is_authenticated and request.user.role == 'executive'):
+            if not (request.user and request.user.is_authenticated and request.user.is_platform_executive):
                 self.permission_denied(request)
         elif self.action in ['update', 'partial_update', 'destroy', 'process']:
-            if not (request.user and request.user.is_authenticated and request.user.role == 'executive'):
+            if not (request.user and request.user.is_authenticated and request.user.is_platform_executive):
                 self.permission_denied(request)
         return super().check_permissions(request)
 
     @action(detail=True, methods=['post'])
     def process(self, request, pk=None):
         """Process an order (executive only)"""
-        if request.user.role != 'executive':
+        if not request.user.is_platform_executive:
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
         order = self.get_object()
@@ -74,7 +74,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get order statistics (executive only)"""
-        if request.user.role != 'executive':
+        if not request.user.is_platform_executive:
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
         orders = Order.objects.all()

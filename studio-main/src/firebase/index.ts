@@ -14,20 +14,21 @@ import {
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
   if (!getApps().length) {
-    // Important! initializeApp() is called without any arguments because Firebase App Hosting
-    // integrates with the initializeApp() function to provide the environment variables needed to
-    // populate the FirebaseOptions in production. It is critical that we attempt to call initializeApp()
-    // without arguments.
     let firebaseApp;
     try {
-      // Attempt to initialize via Firebase App Hosting environment variables
-      firebaseApp = initializeApp();
+      // Prefer the explicit config object on Vercel/Railway style deploys where
+      // Firebase App Hosting auto-initialization is not available.
+      const hasExplicitConfig = Boolean(
+        firebaseConfig?.apiKey &&
+        firebaseConfig?.projectId &&
+        firebaseConfig?.appId
+      );
+
+      firebaseApp = hasExplicitConfig
+        ? initializeApp(firebaseConfig)
+        : initializeApp();
     } catch (e) {
-      // Only warn in production because it's normal to use the firebaseConfig to initialize
-      // during development
-      if (process.env.NODE_ENV === "production") {
-        console.warn('Automatic initialization failed. Falling back to firebase config object.', e);
-      }
+      console.warn('Firebase initialization fallback applied.', e);
       firebaseApp = initializeApp(firebaseConfig);
     }
 

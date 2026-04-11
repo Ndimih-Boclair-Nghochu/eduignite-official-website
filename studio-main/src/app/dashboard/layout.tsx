@@ -75,52 +75,66 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const handleTestimonySubmit = () => {
     if (!testimonyMessage.trim() || !user) return;
     setIsSubmittingTestimony(true);
-    
-    setTimeout(() => {
-      addTestimony({
+
+    addTestimony({
         userId: user.id,
         name: user.name,
         profileImage: user.avatar || "",
         role: user.role,
         schoolName: user.school?.name || "Institution Node",
         message: testimonyMessage,
+      })
+      .then(() => {
+        setIsSubmittingTestimony(false);
+        setIsTestimonyModalOpen(false);
+        setTestimonyMessage("");
+        toast({
+          title: "Testimony Received",
+          description: "Your story has been submitted for review.",
+        });
+      })
+      .catch(() => {
+        setIsSubmittingTestimony(false);
+        toast({
+          variant: "destructive",
+          title: "Submission Failed",
+          description: "We could not submit your testimony right now.",
+        });
       });
-      
-      setIsSubmittingTestimony(false);
-      setIsTestimonyModalOpen(false);
-      setTestimonyMessage("");
-      toast({
-        title: "Testimony Received",
-        description: "Your story has been submitted for review.",
-      });
-    }, 1000);
   };
 
   const handleSupportSubmit = () => {
     if (!supportData.phone || !user || !supportData.amount) return;
     setIsSubmittingSupport(true);
-    
-    setTimeout(() => {
-      addSupport({
-        userName: user.name,
-        userRole: user.role,
-        userAvatar: user.avatar || "",
-        amount: parseInt(supportData.amount),
-        method: supportData.method,
-        phone: supportData.phone,
-        message: supportData.message,
-        schoolName: user.school?.name || "EduIgnite Node",
-        uid: user.uid
+
+    addSupport({
+      userName: user.name,
+      userRole: user.role,
+      userAvatar: user.avatar || "",
+      amount: parseInt(supportData.amount),
+      method: supportData.method,
+      phone: supportData.phone,
+      message: supportData.message,
+      schoolName: user.school?.name || "EduIgnite Node",
+      uid: user.uid
+    })
+      .then(() => {
+        setIsSubmittingSupport(false);
+        setIsSupportModalOpen(false);
+        setSupportData({ amount: "1000", method: "MTN MoMo", phone: "", message: "" });
+        toast({
+          title: "Contribution Received",
+          description: "Thank you for supporting our institutional vision!",
+        });
+      })
+      .catch(() => {
+        setIsSubmittingSupport(false);
+        toast({
+          variant: "destructive",
+          title: "Contribution Failed",
+          description: "We could not record your support contribution right now.",
+        });
       });
-      
-      setIsSubmittingSupport(false);
-      setIsSupportModalOpen(false);
-      setSupportData({ amount: "1000", method: "MTN MoMo", phone: "", message: "" });
-      toast({
-        title: "Contribution Received",
-        description: "Thank you for supporting our institutional vision!",
-      });
-    }, 1500);
   };
 
   if (isLoading) {

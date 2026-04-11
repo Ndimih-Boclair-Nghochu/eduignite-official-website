@@ -64,10 +64,9 @@ export default function LogPostPage() {
     }
 
     setIsProcessing(true);
-    
-    // Prototype Delay
-    setTimeout(() => {
-      addCommunityBlog({
+
+    try {
+      await addCommunityBlog({
         title,
         senderName: user.name,
         senderRole: user.role,
@@ -75,13 +74,16 @@ export default function LogPostPage() {
         image: image || undefined,
         paragraphs: paragraphs.filter(p => p.trim() !== "")
       });
-      
+
       setIsProcessing(false);
       toast({ title: "Log Published", description: "Your post is now visible on the community portal." });
       setTitle("");
       setImage("");
       setParagraphs([""]);
-    }, 1500);
+    } catch (error) {
+      setIsProcessing(false);
+      toast({ variant: "destructive", title: "Publish Failed", description: "We could not publish this strategic log right now." });
+    }
   };
 
   return (

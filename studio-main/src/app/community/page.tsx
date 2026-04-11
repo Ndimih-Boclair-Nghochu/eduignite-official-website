@@ -73,10 +73,9 @@ export default function CommunityTestimonyPage() {
   const handleOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
-    
-    // Prototype Delay
-    setTimeout(() => {
-      addOrder(formData);
+
+    try {
+      await addOrder(formData);
       setIsProcessing(false);
       toast({
         title: "Order Received",
@@ -92,7 +91,14 @@ export default function CommunityTestimonyPage() {
         division: "",
         subDivision: ""
       });
-    }, 1000);
+    } catch (error) {
+      setIsProcessing(false);
+      toast({
+        title: "Submission Failed",
+        description: "We could not submit your activation request right now.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!mounted) return null;

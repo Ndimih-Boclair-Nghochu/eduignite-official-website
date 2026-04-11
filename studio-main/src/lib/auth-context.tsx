@@ -4,8 +4,15 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/lib/api/services/auth.service";
 import { usersService } from "@/lib/api/services/users.service";
+import { platformService } from "@/lib/api/services/platform.service";
+import { communityService } from "@/lib/api/services/community.service";
+import { ordersService } from "@/lib/api/services/orders.service";
+import { supportService } from "@/lib/api/services/support.service";
+import { staffRemarksService } from "@/lib/api/services/staff-remarks.service";
+import { schoolsService } from "@/lib/api/services/schools.service";
+import { feedbackService } from "@/lib/api/services/feedback.service";
+import { announcementsService } from "@/lib/api/services/announcements.service";
 import { setTokens, clearTokens } from "@/lib/api/client";
-import type { User as ApiUser, UserRole as ApiUserRole } from "@/lib/api/types";
 
 export type UserRole = "SUPER_ADMIN" | "CEO" | "CTO" | "COO" | "INV" | "DESIGNER" | "SCHOOL_ADMIN" | "SUB_ADMIN" | "TEACHER" | "STUDENT" | "PARENT" | "BURSAR" | "LIBRARIAN";
 
@@ -203,28 +210,28 @@ interface AuthContextType {
   updatePlatformSettings: (updates: Partial<PlatformSettings>) => Promise<void>;
   markLicensePaid: () => Promise<void>;
   incrementAiRequest: () => Promise<void>;
-  addTestimony: (testimony: Omit<Testimony, "id" | "status" | "createdAt">) => void;
-  approveTestimony: (id: string) => void;
-  deleteTestimony: (id: string) => void;
-  addCommunityBlog: (blog: Omit<CommunityBlog, "id" | "createdAt">) => void;
-  deleteCommunityBlog: (id: string) => void;
-  addFeedback: (feedback: Omit<Feedback, "id" | "status" | "createdAt">) => void;
-  resolveFeedback: (id: string) => void;
-  deleteFeedback: (id: string) => void;
-  addOrder: (order: Omit<Order, "id" | "status" | "createdAt">) => void;
-  processOrder: (id: string) => void;
-  deleteOrder: (id: string) => void;
-  addAnnouncement: (ann: Omit<Announcement, "id" | "createdAt">) => void;
-  deleteAnnouncement: (id: string) => void;
-  addSchool: (school: Omit<SchoolInfo, "status">) => void;
-  toggleSchoolStatus: (id: string) => void;
-  deleteSchool: (id: string) => void;
-  addSupport: (contribution: Omit<SupportContribution, "id" | "status" | "createdAt">) => void;
-  verifySupport: (id: string) => void;
-  deleteSupport: (id: string) => void;
-  addPublicEvent: (event: Omit<PublicEvent, "id">) => void;
-  deletePublicEvent: (id: string) => void;
-  addStaffRemark: (remark: Omit<StaffRemark, "id" | "date">) => void;
+  addTestimony: (testimony: Omit<Testimony, "id" | "status" | "createdAt">) => Promise<void>;
+  approveTestimony: (id: string) => Promise<void>;
+  deleteTestimony: (id: string) => Promise<void>;
+  addCommunityBlog: (blog: Omit<CommunityBlog, "id" | "createdAt">) => Promise<void>;
+  deleteCommunityBlog: (id: string) => Promise<void>;
+  addFeedback: (feedback: Omit<Feedback, "id" | "status" | "createdAt">) => Promise<void>;
+  resolveFeedback: (id: string) => Promise<void>;
+  deleteFeedback: (id: string) => Promise<void>;
+  addOrder: (order: Omit<Order, "id" | "status" | "createdAt">) => Promise<void>;
+  processOrder: (id: string) => Promise<void>;
+  deleteOrder: (id: string) => Promise<void>;
+  addAnnouncement: (ann: Omit<Announcement, "id" | "createdAt">) => Promise<void>;
+  deleteAnnouncement: (id: string) => Promise<void>;
+  addSchool: (school: Omit<SchoolInfo, "status">) => Promise<void>;
+  toggleSchoolStatus: (id: string) => Promise<void>;
+  deleteSchool: (id: string) => Promise<void>;
+  addSupport: (contribution: Omit<SupportContribution, "id" | "status" | "createdAt">) => Promise<void>;
+  verifySupport: (id: string) => Promise<void>;
+  deleteSupport: (id: string) => Promise<void>;
+  addPublicEvent: (event: Omit<PublicEvent, "id">) => Promise<void>;
+  deletePublicEvent: (id: string) => Promise<void>;
+  addStaffRemark: (remark: Omit<StaffRemark, "id" | "date">) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -285,6 +292,116 @@ const mapSchoolInfo = (school: any): SchoolInfo | undefined => {
   };
 };
 
+const mapPlatformSettingsRecord = (settings: any): PlatformSettings => ({
+  name: settings?.name ?? PLATFORM_DEFAULTS.name,
+  logo: settings?.logo ?? "",
+  paymentDeadline: settings?.paymentDeadline ?? settings?.payment_deadline ?? "",
+  fees: {
+    ...DEFAULT_FEES,
+    ...(settings?.fees ?? {}),
+  },
+  tutorialLinks: {
+    ...DEFAULT_TUTORIALS,
+    ...(settings?.tutorialLinks ?? settings?.tutorial_links ?? {}),
+  },
+  honourRollThreshold: Number(settings?.honourRollThreshold ?? settings?.honour_roll_threshold ?? PLATFORM_DEFAULTS.honourRollThreshold),
+});
+
+const mapTestimonyRecord = (testimony: any): Testimony => ({
+  id: testimony?.id ?? "",
+  userId: testimony?.user ?? testimony?.userId ?? "",
+  name: testimony?.name ?? testimony?.user_name ?? testimony?.author?.name ?? "Anonymous",
+  profileImage: testimony?.profileImage ?? testimony?.user_avatar ?? testimony?.author?.avatar ?? "",
+  role: testimony?.role ?? testimony?.role_display ?? testimony?.author?.role ?? "",
+  schoolName: testimony?.schoolName ?? testimony?.school_name ?? "",
+  message: testimony?.message ?? testimony?.content ?? "",
+  status: testimony?.status ?? "pending",
+  createdAt: new Date(testimony?.createdAt ?? testimony?.created_at ?? Date.now()),
+});
+
+const mapCommunityBlogRecord = (blog: any): CommunityBlog => ({
+  id: blog?.id ?? "",
+  title: blog?.title ?? "",
+  senderName: blog?.senderName ?? blog?.author_name ?? blog?.author?.name ?? "",
+  senderRole: blog?.senderRole ?? blog?.author_role ?? blog?.author?.role ?? "",
+  senderAvatar: blog?.senderAvatar ?? blog?.author_avatar ?? blog?.author?.avatar ?? "",
+  image: blog?.image ?? undefined,
+  paragraphs: Array.isArray(blog?.paragraphs) ? blog.paragraphs : [],
+  createdAt: new Date(blog?.createdAt ?? blog?.created_at ?? Date.now()),
+});
+
+const mapFeedbackRecord = (feedback: any): Feedback => ({
+  id: feedback?.id ?? "",
+  subject: feedback?.subject ?? "",
+  message: feedback?.message ?? "",
+  schoolName: feedback?.schoolName ?? feedback?.school?.name ?? "",
+  schoolId: feedback?.schoolId ?? feedback?.school ?? "",
+  schoolLogo: feedback?.schoolLogo ?? feedback?.school?.logo ?? "",
+  senderName: feedback?.senderName ?? feedback?.sender?.name ?? "",
+  senderRole: feedback?.senderRole ?? feedback?.sender?.role ?? "",
+  senderAvatar: feedback?.senderAvatar ?? feedback?.sender?.avatar ?? "",
+  status: feedback?.status ?? "New",
+  createdAt: new Date(feedback?.createdAt ?? feedback?.created_at ?? Date.now()),
+});
+
+const mapOrderRecord = (order: any): Order => ({
+  id: order?.id ?? "",
+  fullName: order?.fullName ?? order?.full_name ?? "",
+  occupation: order?.occupation ?? "",
+  schoolName: order?.schoolName ?? order?.school_name ?? "",
+  whatsappNumber: order?.whatsappNumber ?? order?.whatsapp_number ?? "",
+  email: order?.email ?? "",
+  region: order?.region ?? "",
+  division: order?.division ?? "",
+  subDivision: order?.subDivision ?? order?.sub_division ?? "",
+  status: order?.status ?? "pending",
+  createdAt: new Date(order?.createdAt ?? order?.created_at ?? Date.now()),
+});
+
+const mapAnnouncementRecord = (announcement: any): Announcement => ({
+  id: announcement?.id ?? "",
+  title: announcement?.title ?? "",
+  content: announcement?.content ?? "",
+  target: announcement?.target ?? "",
+  targetUid: announcement?.targetUid ?? announcement?.target_user,
+  senderName: announcement?.senderName ?? announcement?.sender?.name ?? "",
+  senderRole: announcement?.senderRole ?? announcement?.sender?.role ?? "",
+  senderAvatar: announcement?.senderAvatar ?? announcement?.sender?.avatar ?? "",
+  senderUid: announcement?.senderUid ?? announcement?.sender?.uid ?? "",
+  createdAt: new Date(announcement?.createdAt ?? announcement?.created_at ?? Date.now()),
+});
+
+const mapSupportRecord = (support: any): SupportContribution => ({
+  id: support?.id ?? "",
+  uid: support?.uid ?? support?.user?.uid ?? "",
+  userName: support?.userName ?? support?.user?.name ?? "",
+  userRole: support?.userRole ?? support?.user?.role ?? "",
+  userAvatar: support?.userAvatar ?? support?.user?.avatar ?? "",
+  schoolName: support?.schoolName ?? support?.school?.name ?? "",
+  amount: Number(support?.amount ?? 0),
+  method: support?.method ?? support?.payment_method ?? "",
+  phone: support?.phone ?? "",
+  message: support?.message ?? "",
+  status: support?.status ?? "New",
+  createdAt: new Date(support?.createdAt ?? support?.created_at ?? Date.now()),
+});
+
+const mapPublicEventRecord = (event: any): PublicEvent => ({
+  id: event?.id ?? "",
+  type: event?.type ?? "image",
+  title: event?.title ?? "",
+  description: event?.description ?? "",
+  url: event?.url ?? "",
+});
+
+const mapStaffRemarkRecord = (remark: any): StaffRemark => ({
+  id: remark?.id ?? "",
+  staffId: remark?.staffId ?? remark?.staff ?? "",
+  adminName: remark?.adminName ?? remark?.admin?.name ?? "",
+  text: remark?.text ?? "",
+  date: remark?.date ?? remark?.created_at ?? "",
+});
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [userData, setUserData] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -301,6 +418,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [platformSettings, setPlatformSettings] = useState<PlatformSettings>(PLATFORM_DEFAULTS);
 
   const router = useRouter();
+
+  useEffect(() => {
+    const loadPublicPlatformData = async () => {
+      try {
+        const [settings, eventsResponse, blogsResponse, testimoniesResponse] = await Promise.all([
+          platformService.getPlatformSettings(),
+          platformService.getPublicEvents(),
+          communityService.getBlogs(),
+          communityService.getTestimonies(),
+        ]);
+
+        setPlatformSettings(mapPlatformSettingsRecord(settings));
+        setPublicEvents((eventsResponse?.results ?? []).map(mapPublicEventRecord));
+        setCommunityBlogs((blogsResponse?.results ?? []).map(mapCommunityBlogRecord));
+        setTestimonials((testimoniesResponse?.results ?? []).map(mapTestimonyRecord));
+      } catch (error) {
+        console.error("Failed to load public platform data", error);
+      }
+    };
+
+    loadPublicPlatformData();
+  }, []);
 
   useEffect(() => {
     const restoreSession = async () => {
@@ -366,6 +505,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     restoreSession();
   }, []);
 
+  useEffect(() => {
+    const loadAuthenticatedData = async () => {
+      if (!userData) {
+        setStaffRemarks([]);
+        return;
+      }
+
+      try {
+        const requests: Promise<any>[] = [];
+
+        if (userData.role === "SUPER_ADMIN" || userData.role === "CEO" || userData.role === "CTO" || userData.role === "COO") {
+          requests.push(
+            schoolsService.getSchools().then((response) => {
+              setSchools((response?.results ?? []).map(mapSchoolInfo).filter(Boolean) as SchoolInfo[]);
+            })
+          );
+        } else if (userData.school) {
+          setSchools([userData.school]);
+        }
+
+        requests.push(
+          (userData.role === "SCHOOL_ADMIN" || userData.role === "SUB_ADMIN" || userData.role === "SUPER_ADMIN" || userData.role === "CEO" || userData.role === "CTO" || userData.role === "COO"
+            ? staffRemarksService.getRemarks()
+            : staffRemarksService.getMyRemarks()
+          ).then((response) => {
+            const remarks = Array.isArray(response) ? response : response?.results ?? [];
+            setStaffRemarks(remarks.map(mapStaffRemarkRecord));
+          })
+        );
+
+        await Promise.all(requests);
+      } catch (error) {
+        console.error("Failed to load authenticated context data", error);
+      }
+    };
+
+    loadAuthenticatedData();
+  }, [userData]);
+
   const login = async (matricule: string, password: string) => {
     setIsLoading(true);
     try {
@@ -430,7 +608,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updatePlatformSettings = async (updates: Partial<PlatformSettings>) => {
-    setPlatformSettings((prev) => ({ ...prev, ...updates }));
+    const savedSettings = await platformService.updatePlatformSettings({
+      name: updates.name,
+      logo: updates.logo,
+      payment_deadline: updates.paymentDeadline,
+      honour_roll_threshold: updates.honourRollThreshold,
+      fees: updates.fees,
+      tutorial_links: updates.tutorialLinks,
+    });
+    setPlatformSettings(mapPlatformSettingsRecord(savedSettings));
   };
 
   const markLicensePaid = async () => await updateUser({ isLicensePaid: true });
@@ -439,119 +625,168 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await updateUser({ aiRequestCount: (userData.aiRequestCount || 0) + 1 });
   };
 
-  const addTestimony = (t: Omit<Testimony, "id" | "status" | "createdAt">) =>
-    setTestimonials((prev) => [
-      {
-        ...t,
-        id: Math.random().toString(36).substr(2, 9),
-        status: "pending",
-        createdAt: new Date(),
-      },
-      ...prev,
-    ]);
-  const approveTestimony = (id: string) =>
-    setTestimonials((prev) => prev.map((t) => (t.id === id ? { ...t, status: "approved" } : t)));
-  const deleteTestimony = (id: string) =>
-    setTestimonials((prev) => prev.filter((t) => t.id !== id));
-
-  const addCommunityBlog = (b: Omit<CommunityBlog, "id" | "createdAt">) =>
-    setCommunityBlogs((prev) => [
-      { ...b, id: `BLOG-${Math.random().toString(36).substr(2, 5).toUpperCase()}`, createdAt: new Date() },
-      ...prev,
-    ]);
-  const deleteCommunityBlog = (id: string) =>
-    setCommunityBlogs((prev) => prev.filter((b) => b.id !== id));
-
-  const addFeedback = (f: Omit<Feedback, "id" | "status" | "createdAt">) =>
-    setFeedbacks((prev) => [
-      { ...f, id: `FB-${Math.random().toString(36).substr(2, 5).toUpperCase()}`, status: "New", createdAt: new Date() },
-      ...prev,
-    ]);
-  const resolveFeedback = (id: string) =>
-    setFeedbacks((prev) => prev.map((f) => (f.id === id ? { ...f, status: "Resolved" } : f)));
-  const deleteFeedback = (id: string) => setFeedbacks((prev) => prev.filter((f) => f.id !== id));
-
-  const addOrder = (o: Omit<Order, "id" | "status" | "createdAt">) =>
-    setOrders((prev) => [
-      { ...o, id: `ORD-${Math.random().toString(36).substr(2, 5).toUpperCase()}`, status: "pending", createdAt: new Date() },
-      ...prev,
-    ]);
-  const processOrder = (id: string) =>
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status: "processed" } : o)));
-  const deleteOrder = (id: string) => setOrders((prev) => prev.filter((o) => o.id !== id));
-
-  const addAnnouncement = (a: Omit<Announcement, "id" | "createdAt">) =>
-    setAnnouncements((prev) => [
-      { ...a, id: Math.random().toString(), createdAt: new Date() },
-      ...prev,
-    ]);
-  const deleteAnnouncement = (id: string) =>
-    setAnnouncements((prev) => prev.filter((a) => a.id !== id));
-
-  const addSchool = (s: Omit<SchoolInfo, "status">) =>
-    setSchools((prev) => [{ ...s, status: "Active" }, ...prev]);
-  const toggleSchoolStatus = (id: string) =>
-    setSchools((prev) =>
-      prev.map((s) =>
-        s.id === id ? { ...s, status: s.status === "Active" ? "Suspended" : "Active" } : s
-      )
-    );
-  const deleteSchool = (id: string) => setSchools((prev) => prev.filter((s) => s.id !== id));
-
-  const addSupport = (c: Omit<SupportContribution, "id" | "status" | "createdAt">) =>
-    setSupportContributions((prev) => [
-      {
-        ...c,
-        id: `SUP-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
-        status: "New",
-        createdAt: new Date(),
-      },
-      ...prev,
-    ]);
-  const verifySupport = (id: string) => {
-    setSupportContributions((prev) =>
-      prev.map((c) => {
-        if (c.id === id) {
-          setPersonalChats((pc) => [
-            ...pc,
-            {
-              id: `MSG-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-              senderId: "system",
-              senderName: "Platform Team",
-              senderRole: "SYSTEM",
-              senderAvatar: "",
-              receiverId: c.uid,
-              text: `Hello ${c.userName}, your contribution has been verified.`,
-              timestamp: new Date().toLocaleTimeString(),
-              isOfficial: true,
-            },
-          ]);
-          return { ...c, status: "Verified" };
-        }
-        return c;
-      })
-    );
+  const addTestimony = async (t: Omit<Testimony, "id" | "status" | "createdAt">) => {
+    const created = await communityService.createTestimony({
+      school_name: t.schoolName,
+      role_display: t.role,
+      message: t.message,
+    });
+    setTestimonials((prev) => [mapTestimonyRecord(created), ...prev]);
   };
-  const deleteSupport = (id: string) =>
+
+  const approveTestimony = async (id: string) => {
+    await communityService.approveTestimony(id);
+    setTestimonials((prev) => prev.map((t) => (t.id === id ? { ...t, status: "approved" } : t)));
+  };
+
+  const deleteTestimony = async (id: string) => {
+    await communityService.rejectTestimony(id);
+    setTestimonials((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const addCommunityBlog = async (b: Omit<CommunityBlog, "id" | "createdAt">) => {
+    const created = await communityService.createBlog({
+      title: b.title,
+      image: b.image,
+      paragraphs: b.paragraphs,
+    });
+    setCommunityBlogs((prev) => [mapCommunityBlogRecord(created), ...prev]);
+  };
+
+  const deleteCommunityBlog = async (id: string) => {
+    await communityService.deleteBlog(id);
+    setCommunityBlogs((prev) => prev.filter((b) => b.id !== id));
+  };
+
+  const addFeedback = async (f: Omit<Feedback, "id" | "status" | "createdAt">) => {
+    const created = await feedbackService.createFeedback({
+      subject: f.subject,
+      message: f.message,
+      priority: "Medium",
+    });
+    setFeedbacks((prev) => [mapFeedbackRecord(created), ...prev]);
+  };
+
+  const resolveFeedback = async (id: string) => {
+    const resolved = await feedbackService.resolveFeedback(id);
+    setFeedbacks((prev) => prev.map((f) => (f.id === id ? mapFeedbackRecord(resolved) : f)));
+  };
+
+  const deleteFeedback = async (id: string) => {
+    setFeedbacks((prev) => prev.filter((f) => f.id !== id));
+  };
+
+  const addOrder = async (o: Omit<Order, "id" | "status" | "createdAt">) => {
+    const created = await ordersService.createOrder({
+      full_name: o.fullName,
+      occupation: o.occupation,
+      school_name: o.schoolName,
+      whatsapp_number: o.whatsappNumber,
+      email: o.email,
+      region: o.region,
+      division: o.division,
+      sub_division: o.subDivision,
+      message: "",
+    } as any);
+    setOrders((prev) => [mapOrderRecord(created), ...prev]);
+  };
+
+  const processOrder = async (id: string) => {
+    const processed = await ordersService.processOrder(id);
+    setOrders((prev) => prev.map((o) => (o.id === id ? mapOrderRecord(processed) : o)));
+  };
+
+  const deleteOrder = async (id: string) => {
+    setOrders((prev) => prev.filter((o) => o.id !== id));
+  };
+
+  const addAnnouncement = async (a: Omit<Announcement, "id" | "createdAt">) => {
+    const created = await announcementsService.createAnnouncement({
+      title: a.title,
+      content: a.content,
+      target: a.target,
+      target_user: a.targetUid,
+    });
+    setAnnouncements((prev) => [mapAnnouncementRecord(created), ...prev]);
+  };
+
+  const deleteAnnouncement = async (id: string) => {
+    await announcementsService.deleteAnnouncement(id);
+    setAnnouncements((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const addSchool = async (s: Omit<SchoolInfo, "status">) => {
+    const created = await schoolsService.createSchool({
+      name: s.name,
+      short_name: s.shortName,
+      principal: s.principal,
+      motto: s.motto,
+      description: s.description,
+      location: s.location,
+      region: s.region,
+      division: s.division,
+      sub_division: s.subDivision,
+      city_village: s.cityVillage,
+      address: s.address,
+      phone: s.phone,
+      email: s.email,
+      logo: s.logo,
+      banner: s.banner,
+    });
+    const mappedSchool = mapSchoolInfo(created);
+    if (mappedSchool) {
+      setSchools((prev) => [mappedSchool, ...prev]);
+    }
+  };
+
+  const toggleSchoolStatus = async (id: string) => {
+    const updated = await schoolsService.toggleSchoolStatus(id);
+    const mappedSchool = mapSchoolInfo(updated);
+    if (!mappedSchool) return;
+    setSchools((prev) => prev.map((s) => (s.id === id ? mappedSchool : s)));
+  };
+
+  const deleteSchool = async (id: string) => {
+    await schoolsService.deleteSchool(id);
+    setSchools((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const addSupport = async (c: Omit<SupportContribution, "id" | "status" | "createdAt">) => {
+    const created = await supportService.createSupport({
+      amount: c.amount,
+      payment_method: c.method,
+      phone: c.phone,
+      message: c.message,
+    });
+    setSupportContributions((prev) => [mapSupportRecord(created), ...prev]);
+  };
+
+  const verifySupport = async (id: string) => {
+    const verified = await supportService.verifySupport(id);
+    const mappedSupport = mapSupportRecord(verified);
+    setSupportContributions((prev) => prev.map((c) => (c.id === id ? mappedSupport : c)));
+  };
+
+  const deleteSupport = async (id: string) => {
     setSupportContributions((prev) => prev.filter((c) => c.id !== id));
+  };
 
-  const addPublicEvent = (e: Omit<PublicEvent, "id">) =>
-    setPublicEvents((prev) => [
-      { ...e, id: `EVT-${Math.random().toString(36).substr(2, 5).toUpperCase()}` },
-      ...prev,
-    ]);
-  const deletePublicEvent = (id: string) =>
+  const addPublicEvent = async (e: Omit<PublicEvent, "id">) => {
+    const created = await platformService.createPublicEvent(e);
+    setPublicEvents((prev) => [mapPublicEventRecord(created), ...prev]);
+  };
+
+  const deletePublicEvent = async (id: string) => {
+    await platformService.deletePublicEvent(id);
     setPublicEvents((prev) => prev.filter((e) => e.id !== id));
+  };
 
-  const addStaffRemark = (r: Omit<StaffRemark, "id" | "date">) => {
-    setStaffRemarks((prev) => [
-      {
-        ...r,
-        id: `REM-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
-        date: new Date().toLocaleDateString(),
-      },
-      ...prev,
-    ]);
+  const addStaffRemark = async (r: Omit<StaffRemark, "id" | "date">) => {
+    const created = await staffRemarksService.createRemark({
+      staff: r.staffId,
+      text: r.text,
+    });
+    setStaffRemarks((prev) => [mapStaffRemarkRecord(created), ...prev]);
   };
 
   const logout = async () => {
@@ -562,6 +797,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       clearTokens();
       setUserData(null);
+      setStaffRemarks([]);
       router.push("/login");
     }
   };

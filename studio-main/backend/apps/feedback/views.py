@@ -12,6 +12,14 @@ from .serializers import (
 )
 
 
+def is_platform_executive(user):
+    return bool(getattr(user, 'is_authenticated', False) and getattr(user, 'is_platform_executive', False))
+
+
+def is_school_admin(user):
+    return bool(getattr(user, 'is_authenticated', False) and getattr(user, 'is_school_admin', False))
+
+
 class FeedbackViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -31,16 +39,16 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'executive':
+        if is_platform_executive(user):
             return Feedback.objects.all()
-        elif user.role in ['school_admin', 'sub_admin']:
+        elif is_school_admin(user):
             return Feedback.objects.filter(school=user.school)
         else:
             return Feedback.objects.filter(sender=user)
 
     def check_permissions(self, request):
         if self.action in ['update', 'partial_update', 'destroy']:
-            if request.user.role not in ['executive', 'school_admin']:
+            if not (is_platform_executive(request.user) or is_school_admin(request.user)):
                 self.permission_denied(request)
         return super().check_permissions(request)
 
@@ -50,7 +58,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def resolve(self, request, pk=None):
         """Resolve feedback (executive/school_admin only)"""
-        if request.user.role not in ['executive', 'school_admin']:
+        if not (is_platform_executive(request.user) or is_school_admin(request.user)):
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
         feedback = self.get_object()
@@ -63,7 +71,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def respond(self, request, pk=None):
         """Add a response to feedback (executive/school_admin only)"""
-        if request.user.role not in ['executive', 'school_admin']:
+        if not (is_platform_executive(request.user) or is_school_admin(request.user)):
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
         feedback = self.get_object()
@@ -83,7 +91,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get feedback statistics"""
-        if request.user.role not in ['executive', 'school_admin']:
+        if not (is_platform_executive(request.user) or is_school_admin(request.user)):
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
         queryset = self.get_queryset()

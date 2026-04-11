@@ -11,6 +11,10 @@ from .serializers import (
 )
 
 
+def is_platform_executive(user):
+    return bool(getattr(user, 'is_authenticated', False) and getattr(user, 'is_platform_executive', False))
+
+
 class SupportContributionViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -28,21 +32,21 @@ class SupportContributionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'executive':
+        if is_platform_executive(user):
             return SupportContribution.objects.all()
         else:
             return SupportContribution.objects.filter(user=user)
 
     def check_permissions(self, request):
         if self.action in ['verify', 'reject']:
-            if request.user.role != 'executive':
+            if not is_platform_executive(request.user):
                 self.permission_denied(request)
         return super().check_permissions(request)
 
     @action(detail=True, methods=['post'])
     def verify(self, request, pk=None):
         """Verify a contribution (executive only)"""
-        if request.user.role != 'executive':
+        if not is_platform_executive(request.user):
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
         contribution = self.get_object()
@@ -51,13 +55,16 @@ class SupportContributionViewSet(viewsets.ModelViewSet):
             serializer.validated_data['status'] = 'Verified'
             serializer.save()
 
-            from notifications.models import Notification
-            Notification.objects.create(
-                user=contribution.user,
-                title='Support Contribution Verified',
-                message=f"Your contribution of {contribution.amount} {contribution.currency} has been verified",
-                notification_type='success'
-            )
+            try:
+                from notifications.models import Notification
+                Notification.objects.create(
+                    user=contribution.user,
+                    title='Support Contribution Verified',
+                    message=f"Your contribution of {contribution.amount} {contribution.currency} has been verified",
+                    notification_type='success'
+                )
+            except Exception:
+                pass
 
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -65,7 +72,7 @@ class SupportContributionViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def reject(self, request, pk=None):
         """Reject a contribution (executive only)"""
-        if request.user.role != 'executive':
+        if not is_platform_executive(request.user):
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
         contribution = self.get_object()
@@ -75,20 +82,23 @@ class SupportContributionViewSet(viewsets.ModelViewSet):
         contribution.verified_at = timezone.now()
         contribution.save()
 
-        from notifications.models import Notification
-        Notification.objects.create(
-            user=contribution.user,
-            title='Support Contribution Rejected',
-            message=f"Your contribution of {contribution.amount} {contribution.currency} was rejected",
-            notification_type='warning'
-        )
+        try:
+            from notifications.models import Notification
+            Notification.objects.create(
+                user=contribution.user,
+                title='Support Contribution Rejected',
+                message=f"Your contribution of {contribution.amount} {contribution.currency} was rejected",
+                notification_type='warning'
+            )
+        except Exception:
+            pass
 
         return Response({'status': 'contribution rejected'})
 
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get support contribution statistics (executive only)"""
-        if request.user.role != 'executive':
+        if not is_platform_executive(request.user):
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
         all_contributions = SupportContribution.objects.all()
