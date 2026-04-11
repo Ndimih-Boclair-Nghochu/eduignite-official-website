@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import get_user_model
-from django.db.models import Count
+from django.db.models import Count, Sum
 from drf_spectacular.utils import extend_schema
 import logging
 
@@ -319,15 +319,16 @@ class PlatformStatsView(APIView):
     def get(self, request):
         """Get comprehensive platform statistics."""
         from apps.schools.models import School
+        from apps.orders.models import Order
+        from apps.fees.models import Payment
 
         users_queryset = User.objects.all()
         schools_queryset = School.objects.all()
+        payments_queryset = Payment.objects.filter(status='confirmed')
+        orders_queryset = Order.objects.all()
 
-        users_by_role = (
-            users_queryset.values('role')
-            .annotate(count=Count('id'))
-            .order_by('role')
-        )
+        users_by_role_qs = users_queryset.values('role').annotate(count=Count('id')).order_by('role')
+        users_by_role = {item['role']: item['count'] for item in users_by_role_qs}
 
         schools_by_status = (
             schools_queryset.values('status')
@@ -341,14 +342,20 @@ class PlatformStatsView(APIView):
 
         stats_data = {
             'total_schools': schools_queryset.count(),
+            'active_schools': schools_queryset.filter(status='Active').count(),
             'total_users': users_queryset.count(),
             'active_users': users_queryset.filter(is_active=True).count(),
-            'users_by_role': list(users_by_role),
+            'users_by_role': users_by_role,
             'total_students': users_queryset.filter(role='STUDENT').count(),
             'total_teachers': users_queryset.filter(role='TEACHER').count(),
             'total_parents': users_queryset.filter(role='PARENT').count(),
             'license_paid_count': users_queryset.filter(is_license_paid=True).count(),
             'license_unpaid_count': users_queryset.filter(is_license_paid=False).count(),
+            'founder_count': users_queryset.filter(role__in=['CEO', 'CTO']).count(),
+            'executive_count': users_queryset.filter(role__in=['SUPER_ADMIN', 'CEO', 'CTO', 'COO', 'INV', 'DESIGNER']).count(),
+            'new_orders': orders_queryset.filter(status='pending').count(),
+            'total_orders': orders_queryset.count(),
+            'total_revenue': str(payments_queryset.aggregate(total=Sum('amount'))['total'] or 0),
             'schools_by_status': list(schools_by_status),
             'schools_by_region': list(schools_by_region),
             'total_student_enrollments': sum(s.student_count for s in schools_queryset),
@@ -356,4 +363,3 @@ class PlatformStatsView(APIView):
         }
 
         return Response(stats_data)
-

@@ -55,6 +55,14 @@ export const usersService = {
 
   async getExecutives(params?: ListParams): Promise<PaginatedResponse<User>> {
     const { data } = await apiClient.get(API.USERS.EXECUTIVES, { params });
+    if (Array.isArray(data)) {
+      return {
+        count: data.length,
+        next: null,
+        previous: null,
+        results: data,
+      };
+    }
     return data;
   },
 

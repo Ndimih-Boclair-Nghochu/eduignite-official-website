@@ -1,415 +1,255 @@
-
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { useI18n } from "@/lib/i18n-context";
 import { useExecutives } from "@/lib/hooks/useUsers";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  UserPlus, 
-  Crown, 
-  ShieldCheck, 
-  Mail, 
-  Trash2, 
-  Plus, 
-  Fingerprint,
-  CheckCircle2,
-  Loader2,
-  ShieldAlert,
-  Save,
-  X,
-  Globe,
-  TrendingUp,
-  Activity,
-  Zap,
-  History,
-  Building2,
-  Sparkles,
-  Coins,
-  MoreVertical,
-  Pencil,
-  Ban,
-  Smartphone,
-  PieChart
-} from "lucide-react";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogTrigger 
-} from "@/components/ui/dialog";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import {
+  Crown,
+  ShieldCheck,
+  Mail,
+  Smartphone,
+  PieChart,
+  History,
+  Building2,
+  Loader2,
+  Lock,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const MOCK_FOUNDERS: any[] = [];
+const FOUNDER_ROLES = ["CEO", "CTO"];
+const EXECUTIVE_ORDER = ["CEO", "CTO", "SUPER_ADMIN", "COO", "INV", "DESIGNER"];
 
-const EXECUTIVE_LOGS: any[] = [];
+type FounderRecord = {
+  id: string;
+  matricule: string;
+  name: string;
+  email: string;
+  contact: string;
+  role: string;
+  avatar?: string;
+  shares: string;
+  relationship: string;
+  isFounder: boolean;
+  status: string;
+  permissions: {
+    manageSchools: boolean;
+    manageTeam: boolean;
+    viewAnalytics: boolean;
+    manageSupport: boolean;
+  };
+};
+
+const mapExecutiveRecord = (executive: any): FounderRecord => {
+  const role = executive.role || "";
+  const isFounder = FOUNDER_ROLES.includes(role);
+
+  return {
+    id: executive.id,
+    matricule: executive.matricule || executive.id,
+    name: executive.name || "",
+    email: executive.email || "",
+    contact: executive.phone || executive.whatsapp || "",
+    role,
+    avatar: executive.avatar,
+    shares: role === "CEO" || role === "CTO" ? "50%" : "—",
+    relationship:
+      role === "CEO"
+        ? "Co-Founder with equal ownership and full platform authority."
+        : role === "CTO"
+          ? "Co-Founder with equal ownership and full platform authority."
+          : role === "SUPER_ADMIN"
+            ? "Platform super administrator supporting founder governance."
+            : role === "COO"
+              ? "Executive operations leader reporting into the founder board."
+              : role === "INV"
+                ? "Strategic investor visible to the founder board."
+                : "Executive design lead visible to the founder board.",
+    isFounder,
+    status: executive.is_active === false ? "Suspended" : "Active",
+    permissions: {
+      manageSchools: ["CEO", "CTO", "COO", "SUPER_ADMIN"].includes(role),
+      manageTeam: ["CEO", "CTO", "SUPER_ADMIN"].includes(role),
+      viewAnalytics: true,
+      manageSupport: ["CEO", "CTO", "COO", "SUPER_ADMIN"].includes(role),
+    },
+  };
+};
 
 export default function FoundersManagementPage() {
   const { user } = useAuth();
-  const { toast } = useToast();
-  
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [founders, setFounders] = useState<any[]>([]);
-  const [editingFounder, setEditingFounder] = useState<any>(null);
-  
-  const [newFounderData, setNewFounderData] = useState({
-    name: "",
-    email: "",
-    contact: "",
-    shares: "",
-    role: "COO",
-    permissions: { manageSchools: false, manageTeam: false, viewAnalytics: true, manageSupport: false }
-  });
+  const { data: executivesData, isLoading: executivesLoading } = useExecutives();
+  const [records, setRecords] = useState<FounderRecord[]>([]);
 
   const isFounderOwner = ["SUPER_ADMIN", "CEO", "CTO"].includes(user?.role || "");
-
-  // Fetch real executive users from API (CEO, CTO, COO, INV, DESIGNER)
-  const { data: executivesData, isLoading: executivesLoading } = useExecutives();
+  const executiveRecords = executivesData?.results ?? [];
 
   useEffect(() => {
-    if (executivesData?.results?.length) {
-      const mapped = executivesData.results.map((u: any) => ({
-        id: u.matricule,
-        name: u.name,
-        email: u.email,
-        contact: u.phone || u.whatsapp || '',
-        shares: '—',
-        role: u.role,
-        avatar: u.avatar,
-        permissions: {
-          manageSchools: ['CEO', 'CTO', 'COO', 'SUPER_ADMIN'].includes(u.role),
-          manageTeam: ['CEO', 'CTO', 'SUPER_ADMIN'].includes(u.role),
-          viewAnalytics: true,
-          manageSupport: ['CEO', 'CTO', 'COO', 'SUPER_ADMIN'].includes(u.role),
-        },
-      }));
-      setFounders(mapped.length > 0 ? mapped : MOCK_FOUNDERS);
-    } else if (!executivesLoading) {
-      setFounders(MOCK_FOUNDERS);
-    }
-    setIsLoading(executivesLoading);
-  }, [executivesData, executivesLoading]);
+    const mapped = executiveRecords.map(mapExecutiveRecord).sort((a, b) => {
+      return EXECUTIVE_ORDER.indexOf(a.role) - EXECUTIVE_ORDER.indexOf(b.role);
+    });
+    setRecords(mapped);
+  }, [executiveRecords]);
 
-  const handleAddFounder = async () => {
-    if (!isFounderOwner || !newFounderData.name || !newFounderData.email) return;
-    setIsProcessing(true);
-    setTimeout(() => {
-      const year = new Date().getFullYear().toString().slice(-2);
-      const roleCode = newFounderData.role.substring(0, 3).toUpperCase();
-      const generatedId = `EduI${year}${roleCode}${Math.floor(100 + Math.random() * 899)}`;
-      const created = { 
-        ...newFounderData, 
-        id: generatedId, 
-        status: "Active", 
-        avatar: `https://picsum.photos/seed/${generatedId}/150/150` 
-      };
-      setFounders([created, ...founders]);
-      setIsProcessing(false);
-      setIsAddModalOpen(false);
-      setNewFounderData({ 
-        name: "", 
-        email: "", 
-        contact: "", 
-        shares: "", 
-        role: "COO", 
-        permissions: { manageSchools: false, manageTeam: false, viewAnalytics: true, manageSupport: false } 
-      });
-      toast({ title: "Executive Onboarded", description: `${created.name} is now part of the board.` });
-    }, 1200);
-  };
+  const founders = useMemo(() => records.filter((record) => record.isFounder), [records]);
+  const executiveMembers = useMemo(() => records.filter((record) => !record.isFounder), [records]);
 
-  const handleUpdateFounder = () => {
-    if (!editingFounder) return;
-    setIsProcessing(true);
-    setTimeout(() => {
-      setFounders(prev => prev.map(f => f.id === editingFounder.id ? editingFounder : f));
-      setIsProcessing(false);
-      setEditingFounder(null);
-      toast({ title: "Board Record Updated" });
-    }, 800);
-  };
-
-  const handleDeleteFounder = (id: string) => {
-    setFounders(prev => prev.filter(f => f.id !== id));
-    toast({ variant: "destructive", title: "Founder Removed", description: "The executive record has been decommissioned." });
-  };
-
-  const handleToggleStatus = (id: string) => {
-    setFounders(prev => prev.map(f => {
-      if (f.id === id) {
-        const nextStatus = f.status === "Active" ? "Suspended" : "Active";
-        toast({ title: `Founder ${nextStatus}` });
-        return { ...f, status: nextStatus };
-      }
-      return f;
-    }));
-  };
-
-  const PermissionToggle = ({ label, description, checked, onChange, icon: Icon, disabled }: any) => (
-    <div className={cn(
-      "flex items-start gap-3 p-4 rounded-2xl border-2 transition-all", 
-      !disabled ? "cursor-pointer" : "cursor-default opacity-60",
-      checked ? "border-primary bg-primary/5 shadow-sm" : "border-accent bg-white"
-    )} onClick={() => !disabled && onChange(!checked)}>
-      <div className="pt-0.5"><Checkbox checked={checked} onCheckedChange={() => {}} disabled={disabled} className="pointer-events-none" /></div>
-      <div className="flex-1 space-y-1">
-        <div className="flex items-center gap-2"><Icon className={cn("w-4 h-4", checked ? "text-primary" : "text-muted-foreground")} /><span className="font-black text-sm uppercase tracking-tight">{label}</span></div>
-        <p className="text-[10px] text-muted-foreground leading-tight">{description}</p>
+  if (executivesLoading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-primary font-headline flex items-center gap-3">
-            <div className="p-2 bg-primary rounded-xl shadow-lg text-white"><Crown className="w-6 h-6 text-secondary" /></div>
-            Board Governance
+          <h1 className="flex items-center gap-3 text-3xl font-bold text-primary font-headline">
+            <div className="rounded-xl bg-primary p-2 shadow-lg text-white">
+              <Crown className="h-6 w-6 text-secondary" />
+            </div>
+            Founder Governance
           </h1>
-          <p className="text-muted-foreground mt-1">Strategic oversight and global authority management.</p>
+          <p className="mt-1 text-muted-foreground">
+            The CEO and CTO are protected co-founders with equal authority across the entire EduIgnite platform.
+          </p>
         </div>
-        {isFounderOwner && (
-          <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2 shadow-xl h-14 px-8 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-xs">
-                <UserPlus className="w-5 h-5" /> Onboard Executive
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-2xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
-              <DialogHeader className="bg-primary p-10 text-white">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/10 rounded-2xl"><ShieldCheck className="w-8 h-8 text-secondary" /></div>
-                  <div>
-                    <DialogTitle className="text-2xl font-black uppercase">Issue Authority</DialogTitle>
-                    <DialogDescription className="text-white/60">Initialize new board member registry with professional and equity details.</DialogDescription>
-                  </div>
-                </div>
-              </DialogHeader>
-              <div className="p-10 space-y-8 bg-white max-h-[60vh] overflow-y-auto scrollbar-thin">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Identity Name</Label>
-                    <Input value={newFounderData.name || ""} onChange={(e) => setNewFounderData({...newFounderData, name: e.target.value})} className="h-12 bg-accent/30 border-none rounded-xl font-bold" placeholder="Full Legal Name" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Professional Email</Label>
-                    <Input type="email" value={newFounderData.email || ""} onChange={(e) => setNewFounderData({...newFounderData, email: e.target.value})} className="h-12 bg-accent/30 border-none rounded-xl" placeholder="executive@eduignite.io" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Contact Number</Label>
-                    <div className="relative">
-                      <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/40" />
-                      <Input value={newFounderData.contact || ""} onChange={(e) => setNewFounderData({...newFounderData, contact: e.target.value})} className="h-12 bg-accent/30 border-none rounded-xl pl-10 font-bold" placeholder="+237 ..." />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Shares / Equity</Label>
-                    <div className="relative">
-                      <PieChart className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/40" />
-                      <Input value={newFounderData.shares || ""} onChange={(e) => setNewFounderData({...newFounderData, shares: e.target.value})} className="h-12 bg-accent/30 border-none rounded-xl pl-10 font-black" placeholder="e.g. 10% or 5000" />
-                    </div>
-                  </div>
-                  <div className="col-span-2 space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Strategic Board Role</Label>
-                    <Select value={newFounderData.role || "COO"} onValueChange={(v) => setNewFounderData({...newFounderData, role: v})}>
-                      <SelectTrigger className="h-12 bg-accent/30 border-none rounded-xl font-black">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-none shadow-2xl">
-                        <SelectItem value="CEO">Chief Executive Officer (CEO)</SelectItem>
-                        <SelectItem value="CTO">Chief Technology Officer (CTO)</SelectItem>
-                        <SelectItem value="COO">Chief Operations Officer (COO)</SelectItem>
-                        <SelectItem value="INV">Strategic Investor (INV)</SelectItem>
-                        <SelectItem value="DESIGNER">Creative Lead (Designer)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-primary/40 ml-1">Authority Parameters</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <PermissionToggle label="Nodes" description="Provision institutional clusters." icon={Globe} checked={newFounderData.permissions.manageSchools} onChange={(v: boolean) => setNewFounderData({...newFounderData, permissions: {...newFounderData.permissions, manageSchools: v}})} />
-                    <PermissionToggle label="Finance" description="Audit global revenue velocity." icon={TrendingUp} checked={newFounderData.permissions.viewAnalytics} onChange={(v: boolean) => setNewFounderData({...newFounderData, permissions: {...newFounderData.permissions, viewAnalytics: v}})} />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter className="bg-accent/20 p-8 border-t">
-                <Button className="w-full h-16 rounded-2xl shadow-xl font-black uppercase text-sm" onClick={handleAddFounder} disabled={isProcessing || !newFounderData.name}>
-                  {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Authorize Board Member"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
+        <Badge className="h-10 w-fit rounded-xl bg-secondary/20 px-4 text-[10px] font-black uppercase tracking-widest text-primary">
+          {records.length} Executive Accounts Visible
+        </Badge>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid gap-6 md:grid-cols-2">
         {founders.map((founder) => (
-          <Card key={founder.id} className="border-none shadow-xl bg-white overflow-hidden rounded-[2.5rem] group hover:shadow-2xl transition-all duration-500">
-            <CardHeader className={cn(
-              "p-8 text-white text-center pb-12 relative transition-colors duration-500",
-              founder.status === "Active" ? "bg-primary" : "bg-destructive/80"
-            )}>
-              {isFounderOwner && (
-                <div className="absolute top-4 right-4">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-white/40 hover:text-white hover:bg-white/10">
-                        <MoreVertical className="w-5 h-5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-52 rounded-2xl shadow-2xl border-none p-2">
-                      <DropdownMenuLabel className="text-[9px] uppercase font-black opacity-40 px-3">Governance Actions</DropdownMenuLabel>
-                      <DropdownMenuItem className="gap-3 rounded-xl cursor-pointer" onClick={() => setEditingFounder({...founder})}>
-                        <Pencil className="w-4 h-4 text-primary/60" /> <span className="font-bold text-xs">Edit Identity</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-3 rounded-xl cursor-pointer" onClick={() => handleToggleStatus(founder.id)}>
-                        {founder.status === "Active" ? <Ban className="w-4 h-4 text-red-500" /> : <CheckCircle2 className="w-4 h-4 text-green-500" />}
-                        <span className="font-bold text-xs">{founder.status === "Active" ? "Suspend Access" : "Restore Access"}</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-accent" />
-                      <DropdownMenuItem className="text-destructive gap-3 rounded-xl cursor-pointer" onClick={() => handleDeleteFounder(founder.id)}>
-                        <Trash2 className="w-4 h-4" /> <span className="font-bold text-xs">Decommission</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+          <Card key={founder.id} className="overflow-hidden rounded-[2.5rem] border-none bg-white shadow-xl">
+            <CardHeader className="bg-primary p-8 text-white">
+              <div className="flex items-start gap-4">
+                <Avatar className="h-20 w-20 border-4 border-white/20 shadow-xl">
+                  <AvatarImage src={founder.avatar} />
+                  <AvatarFallback className="bg-white text-primary text-2xl font-black">
+                    {founder.name?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="space-y-2">
+                  <CardTitle className="text-2xl font-black uppercase tracking-tight">{founder.name}</CardTitle>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge className="border-none bg-secondary px-4 py-1 text-[8px] font-black uppercase text-primary">Founder</Badge>
+                    <Badge variant="secondary" className="border-none bg-white/10 px-4 py-1 text-[8px] font-black uppercase text-white">
+                      {founder.role}
+                    </Badge>
+                    <Badge className="border-none bg-white px-4 py-1 text-[8px] font-black uppercase text-primary">
+                      {founder.status}
+                    </Badge>
+                  </div>
                 </div>
-              )}
-              
-              <Avatar className="h-28 w-28 border-4 border-white/20 mx-auto shadow-2xl mb-6 group-hover:scale-105 transition-transform duration-500">
-                <AvatarImage src={founder.avatar} />
-                <AvatarFallback className="bg-white text-primary font-black text-2xl">{founder.name?.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <CardTitle className="text-xl font-black uppercase tracking-tight">{founder.name}</CardTitle>
-              <div className="flex items-center justify-center gap-2 mt-2">
-                <Badge variant="secondary" className="bg-white/10 text-white border-none uppercase text-[8px] px-4 py-1">{founder.role}</Badge>
-                <Badge className={cn(
-                  "border-none text-[8px] font-black uppercase px-3",
-                  founder.status === "Active" ? "bg-secondary text-primary" : "bg-white text-destructive"
-                )}>
-                  {founder.status}
-                </Badge>
               </div>
             </CardHeader>
-            <CardContent className="p-8 -mt-8 bg-white rounded-t-[2.5rem] space-y-6">
+            <CardContent className="space-y-5 p-8">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Ownership</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Ownership</p>
                   <div className="flex items-center gap-2">
-                    <PieChart className="w-3.5 h-3.5 text-primary/40" />
-                    <p className="text-base font-black text-primary">{founder.shares || "---"}</p>
+                    <PieChart className="h-4 w-4 text-primary/40" />
+                    <span className="text-lg font-black text-primary">{founder.shares}</span>
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Matricule</p>
-                  <p className="text-sm font-mono font-bold text-primary/60 truncate">{founder.id}</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Matricule</p>
+                  <p className="truncate text-sm font-mono font-bold text-primary/70">{founder.matricule}</p>
                 </div>
               </div>
-              <div className="space-y-4 pt-4 border-t border-accent">
+
+              <div className="rounded-2xl border border-accent bg-accent/20 p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Founder Relationship</p>
+                <p className="mt-2 text-sm font-bold text-primary">{founder.relationship}</p>
+                <p className="mt-2 text-[10px] font-bold text-primary/60">
+                  Protected founder account: cannot be deleted, suspended, or downgraded by the other founder or any other role.
+                </p>
+              </div>
+
+              <div className="space-y-3 border-t border-accent pt-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/5 rounded-lg text-primary/60"><Mail className="w-4 h-4" /></div>
-                  <p className="text-xs font-bold text-primary/80 truncate">{founder.email}</p>
+                  <div className="rounded-lg bg-primary/5 p-2 text-primary/60">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <p className="truncate text-xs font-bold text-primary/80">{founder.email}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/5 rounded-lg text-primary/60"><Smartphone className="w-4 h-4" /></div>
-                  <p className="text-xs font-bold text-primary/80">{founder.contact || "No Contact"}</p>
+                  <div className="rounded-lg bg-primary/5 p-2 text-primary/60">
+                    <Smartphone className="h-4 w-4" />
+                  </div>
+                  <p className="text-xs font-bold text-primary/80">{founder.contact || "No contact configured"}</p>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "Manage Schools", active: founder.permissions.manageSchools },
+                  { label: "Manage Team", active: founder.permissions.manageTeam },
+                  { label: "View Analytics", active: founder.permissions.viewAnalytics },
+                  { label: "Manage Support", active: founder.permissions.manageSupport },
+                ].map((permission) => (
+                  <div
+                    key={permission.label}
+                    className={cn(
+                      "rounded-xl border px-3 py-3 text-center text-[10px] font-black uppercase tracking-widest",
+                      permission.active
+                        ? "border-primary/10 bg-primary/5 text-primary"
+                        : "border-accent bg-white text-muted-foreground"
+                    )}
+                  >
+                    {permission.label}
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* EDIT FOUNDER DIALOG */}
-      <Dialog open={!!editingFounder} onOpenChange={() => setEditingFounder(null)}>
-        <DialogContent className="sm:max-w-xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
-          <DialogHeader className="bg-primary p-8 text-white relative">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/10 rounded-2xl"><Pencil className="w-8 h-8 text-secondary" /></div>
-              <DialogTitle className="text-2xl font-black uppercase">Modify Board Record</DialogTitle>
-            </div>
-            <Button variant="ghost" size="icon" onClick={() => setEditingFounder(null)} className="absolute top-4 right-4 text-white hover:bg-white/10"><X className="w-6 h-6" /></Button>
-          </DialogHeader>
-          <div className="p-8 space-y-6 bg-white">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="col-span-2 space-y-2">
-                <Label className="text-[10px] font-black uppercase ml-1">Executive Identity</Label>
-                <Input value={editingFounder?.name || ""} onChange={(e) => setEditingFounder({...editingFounder, name: e.target.value})} className="h-12 bg-accent/30 border-none rounded-xl font-bold" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase ml-1">Contact</Label>
-                <Input value={editingFounder?.contact || ""} onChange={(e) => setEditingFounder({...editingFounder, contact: e.target.value})} className="h-12 bg-accent/30 border-none rounded-xl font-bold" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase ml-1">Equity</Label>
-                <Input value={editingFounder?.shares || ""} onChange={(e) => setEditingFounder({...editingFounder, shares: e.target.value})} className="h-12 bg-accent/30 border-none rounded-xl font-black" />
-              </div>
-            </div>
-          </div>
-          <DialogFooter className="bg-accent/20 p-6 border-t">
-            <Button onClick={handleUpdateFounder} className="w-full h-14 rounded-2xl shadow-xl font-bold uppercase text-xs" disabled={isProcessing}>
-              {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Commit Identity Changes"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Card className="border-none shadow-sm rounded-[2rem] overflow-hidden bg-white">
-        <CardHeader className="bg-white border-b p-8">
-          <CardTitle className="text-xl font-black text-primary uppercase flex items-center gap-2">
-            <History className="w-6 h-6 text-secondary" /> Board Activity Ledger
+      <Card className="rounded-[2rem] border-none bg-white shadow-sm">
+        <CardHeader className="border-b bg-white p-8">
+          <CardTitle className="flex items-center gap-2 text-xl font-black uppercase text-primary">
+            <Building2 className="h-6 w-6 text-secondary" />
+            Executive Relationship Map
           </CardTitle>
+          <CardDescription>
+            Everyone below is visible to the CEO account, while the CTO remains visible as the other protected founder.
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableBody>
-              {EXECUTIVE_LOGS.map((log, i) => (
-                <TableRow key={i} className="hover:bg-primary/5 transition-colors border-b last:border-0">
+              {records.map((record) => (
+                <TableRow key={record.id} className="border-b transition-colors hover:bg-primary/5 last:border-0">
                   <TableCell className="pl-8 py-4">
                     <div className="flex items-center gap-4">
-                      <div className={cn("p-2.5 rounded-xl shadow-sm bg-white border", log.color.replace('text', 'border'))}>
-                        <log.icon className={cn("w-5 h-5", log.color)} />
+                      <div className="rounded-xl border border-primary/10 bg-white p-2.5 shadow-sm">
+                        {record.isFounder ? <Crown className="h-5 w-5 text-primary" /> : <ShieldCheck className="h-5 w-5 text-primary/60" />}
                       </div>
                       <div>
-                        <p className="text-xs font-black text-primary uppercase">{log.action}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold">Actor: {log.actor}</p>
+                        <p className="text-xs font-black uppercase text-primary">{record.name}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground">Role: {record.role}</p>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right pr-8">
-                    <Badge variant="secondary" className="bg-secondary/20 text-primary border-none text-[8px] font-black uppercase">{log.impact}</Badge>
-                    <p className="text-[9px] text-muted-foreground mt-1 font-bold italic">{log.time}</p>
+                  <TableCell className="pr-8 text-right">
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "border-none text-[8px] font-black uppercase",
+                        record.isFounder ? "bg-secondary/20 text-primary" : "bg-primary/5 text-primary"
+                      )}
+                    >
+                      {record.isFounder ? "Protected Founder" : "Visible to Founder Board"}
+                    </Badge>
+                    <p className="mt-1 text-[9px] font-bold italic text-muted-foreground">{record.relationship}</p>
                   </TableCell>
                 </TableRow>
               ))}
@@ -417,6 +257,36 @@ export default function FoundersManagementPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Card className="rounded-[2rem] border-none bg-white shadow-sm">
+        <CardHeader className="border-b bg-white p-8">
+          <CardTitle className="flex items-center gap-2 text-xl font-black uppercase text-primary">
+            <History className="h-6 w-6 text-secondary" />
+            Founder Protection Rules
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 p-8 md:grid-cols-3">
+          {[
+            "CEO can see the CTO as the other founder and can view all platform-wide stats.",
+            "CTO can see the CEO as the other founder and can view the same founder-level platform scope.",
+            "Founder accounts are protected from deletion, suspension, role downgrade, and superuser removal.",
+          ].map((rule) => (
+            <div key={rule} className="rounded-2xl border border-accent bg-accent/20 p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <Lock className="h-4 w-4 text-primary" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-primary">Founder Rule</span>
+              </div>
+              <p className="text-sm font-bold text-primary/80">{rule}</p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {!isFounderOwner && executiveMembers.length > 0 && (
+        <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          Founder-level destructive controls are intentionally hidden for non-founder roles.
+        </div>
+      )}
     </div>
   );
 }

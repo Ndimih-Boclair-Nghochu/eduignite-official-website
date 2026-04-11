@@ -29,6 +29,8 @@ class UserListSerializer(serializers.ModelSerializer):
     """Serializer for user list view."""
 
     school_name = serializers.CharField(source='school.name', read_only=True)
+    is_platform_executive = serializers.BooleanField(read_only=True)
+    is_school_admin = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -42,6 +44,8 @@ class UserListSerializer(serializers.ModelSerializer):
             'avatar',
             'is_license_paid',
             'is_active',
+            'is_platform_executive',
+            'is_school_admin',
         ]
 
 
@@ -78,6 +82,8 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     school = serializers.SerializerMethodField()
     display_role = serializers.CharField(source='get_role_display', read_only=True)
+    is_platform_executive = serializers.BooleanField(read_only=True)
+    is_school_admin = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -98,6 +104,8 @@ class UserDetailSerializer(serializers.ModelSerializer):
             'is_active',
             'date_joined',
             'display_role',
+            'is_platform_executive',
+            'is_school_admin',
         ]
 
     def get_school(self, obj):

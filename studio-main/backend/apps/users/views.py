@@ -209,6 +209,8 @@ class UserViewSet(viewsets.ModelViewSet):
             'CEO',
             'CTO',
             'COO',
+            'INV',
+            'DESIGNER',
         ]
         queryset = User.objects.filter(role__in=executive_roles)
         serializer = UserListSerializer(queryset, many=True)
