@@ -7,6 +7,10 @@ import { useCallback } from 'react';
 import { usersService } from '@/lib/api/services/users.service';
 import type {
   User,
+  FounderProfile,
+  CreateFounderRequest,
+  UpdateFounderRequest,
+  AddFounderSharesRequest,
   CreateUserRequest,
   UpdateProfileRequest,
   UpdateRoleRequest,
@@ -24,6 +28,7 @@ const usersKeys = {
   detail: (id: string) => [...usersKeys.details(), id] as const,
   stats: () => [...usersKeys.all, 'stats'] as const,
   executives: () => [...usersKeys.all, 'executives'] as const,
+  founders: () => [...usersKeys.all, 'founders'] as const,
   bySchool: (schoolId: string) =>
     [...usersKeys.all, 'school', schoolId] as const,
 };
@@ -69,6 +74,13 @@ export function useExecutives() {
   });
 }
 
+export function useFounders() {
+  return useQuery<FounderProfile[]>({
+    queryKey: usersKeys.founders(),
+    queryFn: () => usersService.getFounders(),
+  });
+}
+
 /**
  * Hook for fetching users by school
  */
@@ -90,6 +102,55 @@ export function useCreateUser() {
     mutationFn: (data: CreateUserRequest) => usersService.createUser(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
+    },
+  });
+}
+
+export function useCreateFounder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateFounderRequest) => usersService.createFounder(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: usersKeys.founders() });
+      queryClient.invalidateQueries({ queryKey: usersKeys.executives() });
+    },
+  });
+}
+
+export function useUpdateFounder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateFounderRequest }) =>
+      usersService.updateFounder(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: usersKeys.founders() });
+      queryClient.invalidateQueries({ queryKey: usersKeys.executives() });
+    },
+  });
+}
+
+export function useAddFounderShares() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: AddFounderSharesRequest }) =>
+      usersService.addFounderShares(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: usersKeys.founders() });
+    },
+  });
+}
+
+export function useDeleteFounder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => usersService.deleteFounder(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: usersKeys.founders() });
+      queryClient.invalidateQueries({ queryKey: usersKeys.executives() });
     },
   });
 }

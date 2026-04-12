@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.core.validators import RegexValidator
@@ -192,3 +193,69 @@ class User(AbstractBaseUser, PermissionsMixin):
         if self.is_platform_executive:
             self.is_staff = True
         super().save(*args, **kwargs)
+
+
+class FounderProfile(models.Model):
+    """Founder board profile with share ownership metadata."""
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='founder_profile',
+    )
+    founder_title = models.CharField(max_length=255)
+    primary_share_percentage = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    is_primary_founder = models.BooleanField(default=False)
+    can_be_removed = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'founder_profiles'
+        ordering = ['-is_primary_founder', 'user__date_joined']
+        indexes = [
+            models.Index(fields=['is_primary_founder']),
+            models.Index(fields=['can_be_removed']),
+        ]
+
+    def __str__(self):
+        return f'{self.user.name} Founder Profile'
+
+    @property
+    def additional_share_percentage(self):
+        total = self.share_adjustments.aggregate(total=models.Sum('percentage')).get('total')
+        return total or Decimal('0.00')
+
+    @property
+    def total_share_percentage(self):
+        return (self.primary_share_percentage or Decimal('0.00')) + self.additional_share_percentage
+
+
+class FounderShareAdjustment(models.Model):
+    """Incremental share allocations granted over time."""
+
+    founder = models.ForeignKey(
+        FounderProfile,
+        on_delete=models.CASCADE,
+        related_name='share_adjustments',
+    )
+    percentage = models.DecimalField(max_digits=6, decimal_places=2)
+    note = models.CharField(max_length=255, blank=True)
+    added_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='founder_share_adjustments_added',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'founder_share_adjustments'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['founder', 'created_at']),
+        ]
+
+    def __str__(self):
+        return f'{self.founder.user.name} +{self.percentage}%'

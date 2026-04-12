@@ -39,3 +39,16 @@ class IsOwnerOrExecutive(BasePermission):
         return (
             obj == request.user or request.user.is_platform_executive
         )
+
+
+class IsPrimaryFounder(BasePermission):
+    """
+    Permission for CEO/CTO founder management.
+    """
+
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and getattr(request.user, 'role', None) in ['CEO', 'CTO']
+        )

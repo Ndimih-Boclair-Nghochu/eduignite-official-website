@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import get_user_model
 from django.db.models import Q, Count
+from django.db import transaction
 from drf_spectacular.utils import extend_schema
 import logging
 
@@ -15,11 +16,37 @@ from .serializers import (
     UserRoleUpdateSerializer,
     LicenseToggleSerializer,
     ProfileUpdateSerializer,
+    FounderProfileSerializer,
+    FounderProfileCreateSerializer,
+    FounderProfileUpdateSerializer,
+    FounderShareCreateSerializer,
 )
-from .permissions import IsExecutiveOrSchoolAdmin, IsExecutive, IsOwnerOrExecutive
+from .permissions import IsExecutiveOrSchoolAdmin, IsExecutive, IsOwnerOrExecutive, IsPrimaryFounder
+from .models import FounderProfile, FounderShareAdjustment
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
+
+
+def sync_primary_founders():
+    founder_defaults = {
+        'CEO': {'founder_title': 'Chief Executive Officer & Co-Founder', 'primary_share_percentage': '40.00'},
+        'CTO': {'founder_title': 'Chief Technology Officer & Co-Founder', 'primary_share_percentage': '27.00'},
+    }
+
+    for role, defaults in founder_defaults.items():
+        user = User.objects.filter(role=role).first()
+        if not user:
+            continue
+        FounderProfile.objects.update_or_create(
+            user=user,
+            defaults={
+                'founder_title': defaults['founder_title'],
+                'primary_share_percentage': defaults['primary_share_percentage'],
+                'is_primary_founder': True,
+                'can_be_removed': False,
+            },
+        )
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -124,6 +151,12 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def destroy(self, request, *args, **kwargs):
         """Delete user (executives only)."""
+        user = self.get_object()
+        if user.role in ['CEO', 'CTO']:
+            return Response(
+                {'detail': 'Primary founder accounts cannot be deleted.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return super().destroy(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
@@ -231,3 +264,76 @@ class UserViewSet(viewsets.ModelViewSet):
             'by_school': User.objects.values('school__name').annotate(count=Count('id')),
         }
         return Response(stats_data)
+
+
+class FounderProfileViewSet(viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FounderProfileSerializer
+    queryset = FounderProfile.objects.select_related('user').prefetch_related('share_adjustments__added_by')
+    lookup_field = 'pk'
+
+    def get_permissions(self):
+        if self.action in ['create', 'partial_update', 'destroy', 'add_shares']:
+            permission_classes = [IsPrimaryFounder]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return FounderProfileCreateSerializer
+        if self.action == 'partial_update':
+            return FounderProfileUpdateSerializer
+        if self.action == 'add_shares':
+            return FounderShareCreateSerializer
+        return FounderProfileSerializer
+
+    def list(self, request, *args, **kwargs):
+        sync_primary_founders()
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        founder = serializer.save()
+        response_serializer = FounderProfileSerializer(founder, context={'request': request})
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @transaction.atomic
+    def partial_update(self, request, *args, **kwargs):
+        founder = self.get_object()
+        serializer = self.get_serializer(founder, data=request.data, partial=True, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        founder = serializer.save()
+        response_serializer = FounderProfileSerializer(founder, context={'request': request})
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+    @transaction.atomic
+    def destroy(self, request, *args, **kwargs):
+        founder = self.get_object()
+        if founder.is_primary_founder or not founder.can_be_removed:
+            return Response(
+                {'detail': 'Primary founders cannot be removed from the system.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        founder.user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsPrimaryFounder])
+    @transaction.atomic
+    def add_shares(self, request, pk=None):
+        founder = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        FounderShareAdjustment.objects.create(
+            founder=founder,
+            percentage=serializer.validated_data['percentage'],
+            note=serializer.validated_data.get('note', ''),
+            added_by=request.user,
+        )
+        founder.refresh_from_db()
+        response_serializer = FounderProfileSerializer(founder, context={'request': request})
+        return Response(response_serializer.data, status=status.HTTP_200_OK)

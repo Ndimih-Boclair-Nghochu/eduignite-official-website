@@ -4,7 +4,16 @@ from django.contrib.auth.password_validation import validate_password
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 import uuid
 
+from .models import FounderProfile, FounderShareAdjustment
+
 User = get_user_model()
+
+FOUNDER_MANAGEABLE_ROLES = [
+    'SUPER_ADMIN',
+    'COO',
+    'INV',
+    'DESIGNER',
+]
 
 
 @extend_schema_serializer(
@@ -271,3 +280,161 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
             'whatsapp',
             'avatar',
         ]
+
+
+class FounderShareAdjustmentSerializer(serializers.ModelSerializer):
+    added_by_name = serializers.CharField(source='added_by.name', read_only=True)
+
+    class Meta:
+        model = FounderShareAdjustment
+        fields = [
+            'id',
+            'percentage',
+            'note',
+            'created_at',
+            'added_by_name',
+        ]
+
+
+class FounderProfileSerializer(serializers.ModelSerializer):
+    user_id = serializers.UUIDField(source='user.id', read_only=True)
+    matricule = serializers.CharField(source='user.matricule', read_only=True)
+    name = serializers.CharField(source='user.name', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+    phone = serializers.CharField(source='user.phone', read_only=True)
+    whatsapp = serializers.CharField(source='user.whatsapp', read_only=True)
+    role = serializers.CharField(source='user.role', read_only=True)
+    is_active = serializers.BooleanField(source='user.is_active', read_only=True)
+    avatar = serializers.ImageField(source='user.avatar', read_only=True)
+    additional_share_percentage = serializers.SerializerMethodField()
+    total_share_percentage = serializers.SerializerMethodField()
+    share_adjustments = FounderShareAdjustmentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = FounderProfile
+        fields = [
+            'id',
+            'user_id',
+            'matricule',
+            'name',
+            'email',
+            'phone',
+            'whatsapp',
+            'role',
+            'avatar',
+            'founder_title',
+            'primary_share_percentage',
+            'additional_share_percentage',
+            'total_share_percentage',
+            'is_primary_founder',
+            'can_be_removed',
+            'is_active',
+            'share_adjustments',
+            'created_at',
+            'updated_at',
+        ]
+
+    def get_additional_share_percentage(self, obj):
+        return f'{obj.additional_share_percentage:.2f}'
+
+    def get_total_share_percentage(self, obj):
+        return f'{obj.total_share_percentage:.2f}'
+
+
+class FounderProfileCreateSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
+    email = serializers.EmailField()
+    phone = serializers.CharField(max_length=20)
+    whatsapp = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    role = serializers.ChoiceField(choices=FOUNDER_MANAGEABLE_ROLES)
+    founder_title = serializers.CharField(max_length=255)
+    primary_share_percentage = serializers.DecimalField(max_digits=6, decimal_places=2)
+
+    def validate_primary_share_percentage(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('Primary share percentage must be greater than zero.')
+        return value
+
+    def create(self, validated_data):
+        request = self.context['request']
+        matricule = self._generate_founder_matricule(validated_data['role'])
+        user = User.objects.create_user(
+            matricule=matricule,
+            name=validated_data['name'],
+            email=validated_data['email'],
+            phone=validated_data['phone'],
+            whatsapp=validated_data.get('whatsapp') or validated_data['phone'],
+            role=validated_data['role'],
+            password='!pending_activation',
+            is_active=True,
+            is_license_paid=True,
+        )
+        profile = FounderProfile.objects.create(
+            user=user,
+            founder_title=validated_data['founder_title'],
+            primary_share_percentage=validated_data['primary_share_percentage'],
+            is_primary_founder=False,
+            can_be_removed=True,
+        )
+        return profile
+
+    def _generate_founder_matricule(self, role):
+        prefix_map = {
+            'SUPER_ADMIN': 'SUP',
+            'COO': 'COO',
+            'INV': 'INV',
+            'DESIGNER': 'DSN',
+        }
+        prefix = prefix_map.get(role, 'FND')
+        counter = 1
+        while True:
+            matricule = f'EDU-FND-{prefix}-{counter:04d}'
+            if not User.objects.filter(matricule=matricule).exists():
+                return matricule
+            counter += 1
+
+
+class FounderProfileUpdateSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255, required=False)
+    email = serializers.EmailField(required=False)
+    phone = serializers.CharField(max_length=20, required=False)
+    whatsapp = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    role = serializers.ChoiceField(choices=FOUNDER_MANAGEABLE_ROLES, required=False)
+    founder_title = serializers.CharField(max_length=255, required=False)
+    primary_share_percentage = serializers.DecimalField(max_digits=6, decimal_places=2, required=False)
+    is_active = serializers.BooleanField(required=False)
+
+    def validate_primary_share_percentage(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('Primary share percentage must be greater than zero.')
+        return value
+
+    def update(self, instance, validated_data):
+        user = instance.user
+
+        if instance.is_primary_founder and 'role' in validated_data:
+            raise serializers.ValidationError({'role': 'Primary founder roles cannot be changed.'})
+        if instance.is_primary_founder and 'primary_share_percentage' in validated_data:
+            raise serializers.ValidationError({'primary_share_percentage': 'Primary founder shares are fixed. Use additional shares instead.'})
+
+        for field in ['name', 'email', 'phone', 'whatsapp', 'role', 'is_active']:
+            if field in validated_data:
+                setattr(user, field, validated_data[field])
+        user.save()
+
+        if 'founder_title' in validated_data:
+            instance.founder_title = validated_data['founder_title']
+        if 'primary_share_percentage' in validated_data and not instance.is_primary_founder:
+            instance.primary_share_percentage = validated_data['primary_share_percentage']
+        instance.save()
+        return instance
+
+
+class FounderShareCreateSerializer(serializers.Serializer):
+    percentage = serializers.DecimalField(max_digits=6, decimal_places=2)
+    note = serializers.CharField(max_length=255, required=False, allow_blank=True)
+
+    def validate_percentage(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('Additional share percentage must be greater than zero.')
+        return value

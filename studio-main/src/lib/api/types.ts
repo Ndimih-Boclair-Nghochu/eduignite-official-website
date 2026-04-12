@@ -111,6 +111,55 @@ export interface User {
   isSchoolAdmin?: boolean;
 }
 
+export interface FounderShareAdjustment {
+  id: string;
+  percentage: string;
+  note?: string;
+  created_at: string;
+  added_by_name?: string;
+}
+
+export interface FounderProfile {
+  id: string;
+  user_id: string;
+  matricule: string;
+  name: string;
+  email: string;
+  phone?: string;
+  whatsapp?: string;
+  role: UserRole;
+  avatar?: string;
+  founder_title: string;
+  primary_share_percentage: string;
+  additional_share_percentage: string;
+  total_share_percentage: string;
+  is_primary_founder: boolean;
+  can_be_removed: boolean;
+  is_active: boolean;
+  share_adjustments: FounderShareAdjustment[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateFounderRequest {
+  name: string;
+  email: string;
+  phone: string;
+  whatsapp?: string;
+  role: Extract<UserRole, "SUPER_ADMIN" | "COO" | "INV" | "DESIGNER">;
+  founder_title: string;
+  primary_share_percentage: string;
+}
+
+export type UpdateFounderRequest = Partial<CreateFounderRequest> & {
+  is_active?: boolean;
+};
+
+export interface AddFounderSharesRequest {
+  percentage: string;
+  note?: string;
+}
+
 export interface LoginRequest {
   matricule: string;
   password?: string;

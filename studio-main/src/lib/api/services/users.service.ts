@@ -2,11 +2,15 @@ import { apiClient } from '../client';
 import { API } from '../endpoints';
 import {
   User,
+  FounderProfile,
   PaginatedResponse,
   ListParams,
   CreateUserRequest,
   UpdateUserRequest,
   PlatformStats,
+  CreateFounderRequest,
+  UpdateFounderRequest,
+  AddFounderSharesRequest,
 } from '../types';
 
 export const usersService = {
@@ -74,6 +78,30 @@ export const usersService = {
   async createUser(userData: CreateUserRequest): Promise<User> {
     const { data } = await apiClient.post(API.USERS.BASE, userData);
     return data;
+  },
+
+  async getFounders(): Promise<FounderProfile[]> {
+    const { data } = await apiClient.get(API.USERS.FOUNDERS);
+    return data;
+  },
+
+  async createFounder(payload: CreateFounderRequest): Promise<FounderProfile> {
+    const { data } = await apiClient.post(API.USERS.FOUNDERS, payload);
+    return data;
+  },
+
+  async updateFounder(id: string, payload: UpdateFounderRequest): Promise<FounderProfile> {
+    const { data } = await apiClient.patch(API.USERS.FOUNDER_DETAIL(id), payload);
+    return data;
+  },
+
+  async addFounderShares(id: string, payload: AddFounderSharesRequest): Promise<FounderProfile> {
+    const { data } = await apiClient.post(API.USERS.ADD_FOUNDER_SHARES(id), payload);
+    return data;
+  },
+
+  async deleteFounder(id: string): Promise<void> {
+    await apiClient.delete(API.USERS.FOUNDER_DETAIL(id));
   },
 
   async deleteUser(id: string): Promise<void> {
