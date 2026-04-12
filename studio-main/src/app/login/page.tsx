@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n-context";
+import { useFirebaseBootstrapStatus } from "@/firebase/client-provider";
 import {
   Card,
   CardContent,
@@ -29,6 +30,7 @@ import {
   Sparkles,
   Eye,
   EyeOff,
+  AlertTriangle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -49,6 +51,7 @@ export default function LoginPage() {
   const { login, activateAccount, platformSettings } = useAuth();
   const { setLanguage, language, t } = useI18n();
   const { toast } = useToast();
+  const { initError: firebaseInitError } = useFirebaseBootstrapStatus();
 
   const [mode, setAuthMode] = useState<AuthMode>("login");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -86,7 +89,11 @@ export default function LoginPage() {
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || error.response?.data?.detail || error.message || t("loginFailedTryAgain");
-      toast({ variant: "destructive", title: t("authFailed"), description: errorMessage });
+      toast({
+        variant: "destructive",
+        title: t("authFailed"),
+        description: firebaseInitError ? `${firebaseInitError} ${errorMessage}` : errorMessage,
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -118,7 +125,7 @@ export default function LoginPage() {
         toast({
           variant: "destructive",
           title: t("authFailed"),
-          description: errorMessage,
+          description: firebaseInitError ? `${firebaseInitError} ${errorMessage}` : errorMessage,
         });
       } finally {
         setIsProcessing(false);
@@ -247,10 +254,27 @@ export default function LoginPage() {
                     ? t("signIn")
                     : mode === "activate"
                       ? t("activateAccountTitle")
-                      : t("resetPassword")}
+                    : t("resetPassword")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="px-10">
+                {firebaseInitError && (
+                  <div className="mb-6 rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-left shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 rounded-full bg-red-100 p-2 text-red-600">
+                        <AlertTriangle className="h-4 w-4" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-700">
+                          Login setup problem
+                        </p>
+                        <p className="text-sm font-medium leading-relaxed text-red-900">
+                          {firebaseInitError}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <form onSubmit={handleAuth} className="space-y-6">
                   {mode === "forgot" && (
                     <div className="space-y-6 animate-in slide-in-from-top-2">
