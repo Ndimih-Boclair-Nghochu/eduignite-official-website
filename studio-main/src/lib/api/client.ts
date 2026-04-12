@@ -30,7 +30,19 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const isBrowser = typeof window !== 'undefined';
+    const currentPath = isBrowser ? window.location.pathname : '';
+    const refresh = isBrowser ? localStorage.getItem('eduignite_refresh_token') : null;
+    const access = isBrowser ? localStorage.getItem('eduignite_access_token') : null;
+    const isAuthEndpoint = Boolean(originalRequest?.url?.includes('/auth/'));
+
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Public pages can make unauthenticated requests; do not force a reload loop
+      // when there is no active session to refresh.
+      if (!refresh || !access || isAuthEndpoint) {
+        return Promise.reject(error);
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -42,7 +54,6 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
       try {
-        const refresh = localStorage.getItem('eduignite_refresh_token');
         if (!refresh) throw new Error('No refresh token');
         const { data } = await axios.post(`${BASE_URL}/auth/refresh/`, { refresh });
         const newAccess = data.access;
@@ -55,7 +66,9 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('eduignite_access_token');
         localStorage.removeItem('eduignite_refresh_token');
         localStorage.removeItem('eduignite_user');
-        if (typeof window !== 'undefined') window.location.href = '/login';
+        if (isBrowser && currentPath !== '/login') {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
