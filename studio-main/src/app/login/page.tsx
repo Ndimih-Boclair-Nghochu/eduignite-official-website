@@ -47,6 +47,44 @@ type AuthMode = "login" | "activate" | "forgot" | "otp" | "reset" | "success";
 
 const isDev = process.env.NODE_ENV === "development";
 
+const formatAuthError = (error: any, fallback: string) => {
+  const data = error?.response?.data;
+
+  if (typeof data === "string" && data.trim()) {
+    return data;
+  }
+
+  if (data?.detail) {
+    return data.detail;
+  }
+
+  if (data?.message) {
+    return data.message;
+  }
+
+  if (data && typeof data === "object") {
+    const fieldMessages = Object.entries(data)
+      .flatMap(([field, value]) => {
+        if (Array.isArray(value)) {
+          return value.map((item) => `${field}: ${String(item)}`);
+        }
+
+        if (typeof value === "string") {
+          return `${field}: ${value}`;
+        }
+
+        return [];
+      })
+      .filter(Boolean);
+
+    if (fieldMessages.length > 0) {
+      return fieldMessages.join(" ");
+    }
+  }
+
+  return error?.message || fallback;
+};
+
 export default function LoginPage() {
   const { login, activateAccount, platformSettings } = useAuth();
   const { setLanguage, language, t } = useI18n();
@@ -87,8 +125,7 @@ export default function LoginPage() {
       await login(matricule, authData.password);
       toast({ title: t("welcomeBack"), description: t("connectedToLiveBackend") });
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || error.response?.data?.detail || error.message || t("loginFailedTryAgain");
+      const errorMessage = formatAuthError(error, t("loginFailedTryAgain"));
       toast({
         variant: "destructive",
         title: t("authFailed"),
@@ -120,8 +157,7 @@ export default function LoginPage() {
           await login(authData.matricule, authData.password);
         }
       } catch (error: any) {
-        const errorMessage =
-          error.response?.data?.message || error.response?.data?.detail || error.message || t("invalidCredentials");
+        const errorMessage = formatAuthError(error, t("invalidCredentials"));
         toast({
           variant: "destructive",
           title: t("authFailed"),
